@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Poop Price Calculator</title>
+<style>
+  :root{
+    --bg:#0a0f1a; --bg2:#0c1324; --card:#0f1a33; --text:#e6edf3; --muted:#9aa4b2;
+    --accent:#6ea8ff; --accent2:#22d3ee; --ring: rgba(110,168,255,.25);
+    --radius:16px;
+  }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{
+    margin:0; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(1000px 700px at 10% -10%, #142955 0%, transparent 55%),
+      radial-gradient(900px 600px at 100% 0%, #0b2e38 0%, transparent 60%),
+      linear-gradient(180deg,var(--bg),var(--bg2));
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .wrap{width:100%; max-width:560px}
+  h1{
+    margin:0 0 10px; text-align:center; font-size:clamp(22px,4vw,34px); font-weight:900;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 30px rgba(110,168,255,.25);
+  }
+  .subtitle{margin:0 0 16px; text-align:center; color:var(--muted); font-size:.95rem}
+  .card{
+    background:rgba(15,26,51,.7); border:1px solid rgba(255,255,255,.06);
+    border-radius:var(--radius); box-shadow:0 12px 40px rgba(0,0,0,.45);
+    backdrop-filter: blur(6px); padding:18px;
+  }
+  .grid{display:grid; gap:12px}
+  @media (min-width:640px){ .grid{grid-template-columns:1fr 1fr} }
+  label{font-size:.9rem; color:#cbd5e1}
+  input{
+    width:100%; border-radius:12px; padding:.75rem .9rem; background:#0b152a;
+    color:var(--text); border:1px solid rgba(148,163,184,.25); outline:none;
+  }
+  input:focus{border-color:#6ea8ff; box-shadow:0 0 0 4px var(--ring)}
+  .full{grid-column:1/-1}
+  .result{
+    margin-top:14px; padding:18px; border-radius:12px; background:#0b152a;
+    border:1px solid rgba(148,163,184,.2); text-align:center;
+  }
+  .price{font-size:clamp(26px,5vw,40px); font-weight:900}
+  .tag{display:inline-flex; gap:8px; align-items:center; padding:.4rem .7rem; border-radius:999px;
+       background:#0e1a30; border:1px solid rgba(148,163,184,.25); color:var(--muted); font-size:.85rem}
+  .footer{margin-top:8px; text-align:center; color:var(--muted); font-size:.8rem}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Poop Price Calculator</h1>
+    <p class="subtitle">💩 + 🚽 → prix instantané (trajet aller&nbsp;+&nbsp;retour inclus)</p>
+
+    <div class="card">
+      <div class="grid">
+        <div>
+          <label for="tj">Taux journalier (€/jour)</label>
+          <input id="tj" type="number" min="0" step="1" inputmode="numeric" />
+        </div>
+        <div>
+          <label for="activeH">Temps facturable (heures)</label>
+          <input id="activeH" type="number" min="0.25" step="0.25" />
+        </div>
+
+        <div>
+          <label for="poopMin">Durée du 💩 (minutes)</label>
+          <input id="poopMin" type="number" min="0" step="1" inputmode="numeric" />
+        </div>
+        <div>
+          <label for="oneWaySec">Trajet 🚶→🚽 (secondes, aller)</label>
+          <input id="oneWaySec" type="number" min="0" step="1" inputmode="numeric" />
+        </div>
+
+        <div class="full result" id="result">
+          <div class="price" id="price">—</div>
+          <div class="tag">Inclut le trajet aller&nbsp;+&nbsp;retour</div>
+        </div>
+      </div>
+
+      <div class="footer">Tout se met à jour au fil de la saisie. Valeurs par défaut appliquées.</div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const DEFAULTS = {
+    tj: 600,        // € / jour
+    activeH: 7.5,   // heures facturables (ex: 6 h 30)
+    poopMin: 6,     // minutes
+    oneWaySec: 30   // secondes (retour = aller, implicite)
+  };
+
+  // Elements
+  const el = id => document.getElementById(id);
+  const tj = el('tj');
+  const activeH = el('activeH');
+  const poopMin = el('poopMin');
+  const oneWaySec = el('oneWaySec');
+  const price = el('price');
+
+  const fmtMoney = (n) => new Intl.NumberFormat('fr-FR', {
+    style:'currency', currency:'EUR', minimumFractionDigits:2, maximumFractionDigits:2
+  }).format(n);
+
+  function compute(){
+    const TJ = Math.max(0, Number(tj.value || 0));
+    const H  = Math.max(0.0001, Number(activeH.value || 0)); // évite /0
+    const poopM = Math.max(0, Number(poopMin.value || 0));
+    const oneS  = Math.max(0, Number(oneWaySec.value || 0));
+
+    const activeMin = H * 60;
+    const perMin = TJ / activeMin;
+
+    const totalMinutes = poopM + (2 * oneS) / 60;
+    const cost = totalMinutes * perMin;
+
+    price.textContent = fmtMoney(cost);
+  }
+
+  // Defaults + live compute
+  function init(){
+    tj.value = DEFAULTS.tj;
+    activeH.value = DEFAULTS.activeH;
+    poopMin.value = DEFAULTS.poopMin;
+    oneWaySec.value = DEFAULTS.oneWaySec;
+    compute();
+  }
+
+  [tj, activeH, poopMin, oneWaySec].forEach(i => i.addEventListener('input', compute));
+  init();
+})();
+</script>
+</body>
+</html>
