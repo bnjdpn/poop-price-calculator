@@ -78,6 +78,15 @@
         .input-group{position:relative}
         .input-suffix{position:absolute; right:12px; top:50%; transform:translateY(-50%);
                       color:var(--muted); font-size:.85rem; pointer-events:none}
+        .extra-grid{display:grid; gap:12px}
+        .extra-grid--split{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+        .range-row{display:flex; align-items:center; gap:12px; padding:.7rem .9rem; border-radius:12px;
+                   background:#0b152a; border:1px solid rgba(148,163,184,.25)}
+        [data-theme="light"] .range-row{background:#f8fafc; border:1px solid #cbd5e1}
+        .range-row input[type=range]{flex:1; accent-color:var(--accent); cursor:pointer}
+        .range-value{min-width:48px; font-weight:600; color:var(--accent); text-align:right;
+                     font-variant-numeric:tabular-nums}
+        #modeExtras:empty{display:none}
         .full{grid-column:1/-1}
         .result{
             margin-top:14px; padding:18px; border-radius:12px; background:#0b152a;
@@ -85,6 +94,9 @@
             overflow:hidden;
         }
         [data-theme="light"] .result{background:#f8fafc; border:1px solid #cbd5e1}
+        #result[data-tone="success"]{border-color:rgba(34,197,94,.45); box-shadow:0 12px 30px rgba(34,197,94,.12)}
+        #result[data-tone="warning"]{border-color:rgba(245,158,11,.45); box-shadow:0 12px 30px rgba(245,158,11,.12)}
+        #result[data-tone="danger"]{border-color:rgba(239,68,68,.45); box-shadow:0 12px 30px rgba(239,68,68,.15)}
         .price{font-size:clamp(26px,5vw,40px); font-weight:900; position:relative; z-index:2}
         .price-animation{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(0);
                         font-size:2rem; opacity:0; z-index:1; pointer-events:none}
@@ -118,7 +130,9 @@
         .btn-primary{background:var(--accent); color:white}
         .btn-secondary{background:var(--card); color:var(--text); border:1px solid rgba(255,255,255,.1)}
         [data-theme="light"] .btn-secondary{border:1px solid #e2e8f0}
-        .btn:hover{opacity:.9; transform:translateY(-1px)}
+        .btn:disabled{opacity:.45; cursor:not-allowed; transform:none}
+        .btn:focus-visible{outline:2px solid var(--accent2); outline-offset:2px}
+        .btn:not(:disabled):hover{opacity:.9; transform:translateY(-1px)}
         .btn-group{display:flex; gap:8px; flex-wrap:wrap; justify-content:center}
         .mode-selector{display:flex; background:#0b152a; border-radius:12px; padding:4px; margin-bottom:16px}
         [data-theme="light"] .mode-selector{background:#f1f5f9; border:1px solid #e2e8f0}
@@ -137,6 +151,34 @@
             0%,100%{opacity:1}
             50%{opacity:.5}
         }
+        .timer-card h3{margin:0 0 12px; display:flex; align-items:center; gap:8px; font-size:1.05rem}
+        .timer-display{font-size:2.4rem; font-weight:700; text-align:center; letter-spacing:1px; margin-bottom:12px}
+        .timer-meta{display:flex; justify-content:space-between; gap:12px; margin-bottom:12px; font-size:.82rem; color:var(--muted)}
+        .timer-meta span{display:flex; align-items:center; gap:6px}
+        .timer-controls{justify-content:center}
+        .timer-controls .btn{min-width:110px}
+        .timer-running{color:var(--accent2)}
+        .info-note{margin-top:12px; font-size:.8rem; color:var(--muted); text-align:center}
+        .insights-list{display:flex; flex-direction:column; gap:10px; font-variant-numeric:tabular-nums}
+        .insight-item{display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:12px; background:rgba(148,163,184,.12)}
+        [data-theme="light"] .insight-item{background:#e2e8f0}
+        .insight-label{font-size:.85rem; color:var(--muted)}
+        .insight-value{font-weight:600}
+        .sparkline{width:100%; height:80px; margin-top:16px}
+        .sparkline rect{fill:rgba(148,163,184,.1)}
+        [data-theme="light"] .sparkline rect{fill:#e2e8f0}
+        .sparkline path{fill:none; stroke:var(--accent2); stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+        .toast-container{position:fixed; bottom:24px; right:24px; display:flex; flex-direction:column; gap:10px; z-index:2000; pointer-events:none}
+        .toast{background:var(--card); color:var(--text); border:1px solid rgba(148,163,184,.2); padding:12px 16px; border-radius:12px;
+               box-shadow:0 12px 30px rgba(0,0,0,.35); opacity:.95; transform:translateY(0); transition:opacity .3s ease, transform .3s ease;
+               pointer-events:auto}
+        [data-theme="light"] .toast{background:#ffffff; border:1px solid #cbd5e1}
+        .toast.hide{opacity:0; transform:translateY(12px)}
+        .achievements{display:grid; gap:10px}
+        .achievement{padding:10px 12px; border-radius:12px; background:rgba(148,163,184,.12); display:flex; justify-content:space-between; align-items:center}
+        [data-theme="light"] .achievement{background:#e2e8f0}
+        .achievement.locked{opacity:.55}
+        .achievement span{display:flex; gap:6px; align-items:center}
         @media (max-width:640px){
             body{padding:16px}
             .header-controls{flex-direction:column; gap:12px}
@@ -180,7 +222,7 @@
             <div>
                 <label for="poopMin">Durée du 💩 (minutes)</label>
                 <div class="input-group">
-                    <input id="poopMin" type="number" min="0" step="1" inputmode="numeric" />
+                    <input id="poopMin" type="number" min="0" step="0.5" inputmode="decimal" />
                     <span class="input-suffix">min</span>
                 </div>
             </div>
@@ -191,6 +233,16 @@
                     <span class="input-suffix">sec</span>
                 </div>
             </div>
+
+            <div>
+                <label for="frequency">Fréquence quotidienne</label>
+                <div class="input-group">
+                    <input id="frequency" type="number" min="0" step="0.5" inputmode="decimal" />
+                    <span class="input-suffix">/jour</span>
+                </div>
+            </div>
+
+            <div class="full" id="modeExtras" aria-live="polite"></div>
 
             <div class="full result" id="result">
                 <div class="price-animation" id="priceAnimation">💸</div>
@@ -209,6 +261,21 @@
         </div>
 
         <div class="footer">Tout se met à jour au fil de la saisie. Valeurs par défaut appliquées.</div>
+    </div>
+
+    <div class="card timer-card">
+        <h3>🕒 Minuteur de session</h3>
+        <div class="timer-display" id="timerDisplay">00:00</div>
+        <div class="timer-meta">
+            <span id="timerStatus">En attente</span>
+            <span id="timerAutoFill">Remplit automatiquement la durée</span>
+        </div>
+        <div class="btn-group timer-controls">
+            <button class="btn btn-primary" id="timerStart">▶️ Lancer</button>
+            <button class="btn btn-secondary" id="timerPause">⏸️ Pause</button>
+            <button class="btn btn-secondary" id="timerApply">✅ Appliquer</button>
+        </div>
+        <div class="info-note">Le minuteur enregistre la durée du 💩 et met à jour le champ correspondant.</div>
     </div>
 </div>
 
@@ -236,6 +303,36 @@
     </div>
 
     <div class="card">
+        <h3 style="margin:0 0 16px; color:var(--accent)">💡 Insights</h3>
+        <div class="insights-list">
+            <div class="insight-item">
+                <span class="insight-label">Impact quotidien</span>
+                <span class="insight-value" id="insightDaily">—</span>
+            </div>
+            <div class="insight-item">
+                <span class="insight-label">Impact mensuel (22j)</span>
+                <span class="insight-value" id="insightMonthly">—</span>
+            </div>
+            <div class="insight-item">
+                <span class="insight-label">Impact annuel</span>
+                <span class="insight-value" id="insightYearly">—</span>
+            </div>
+            <div class="insight-item">
+                <span class="insight-label">Temps perdu / jour</span>
+                <span class="insight-value" id="insightTime">—</span>
+            </div>
+            <div class="insight-item">
+                <span class="insight-label">Équivalent cafés</span>
+                <span class="insight-value" id="insightCoffees">—</span>
+            </div>
+        </div>
+        <svg class="sparkline" id="historySparkline" viewBox="0 0 100 40" preserveAspectRatio="none" role="img" aria-label="Historique des coûts (derniers calculs)">
+            <rect x="0" y="0" width="100" height="40" rx="12" ry="12"></rect>
+            <path id="sparklinePath" d="" opacity="0"></path>
+        </svg>
+    </div>
+
+    <div class="card">
         <h3 style="margin:0 0 16px; color:var(--accent)">📝 Historique</h3>
         <div class="history-list" id="historyList">
             <div style="text-align:center; color:var(--muted); font-style:italic">Aucun calcul encore</div>
@@ -245,35 +342,96 @@
             <button class="btn btn-secondary" id="clearHistoryBtn">🗑️ Vider</button>
         </div>
     </div>
-</div>
-
+    <div class="card">
+        <h3 style="margin:0 0 16px; color:var(--accent)">🏆 Succès</h3>
+        <div class="achievements" id="achievementsList">
+            <div class="achievement locked" data-key="first">
+                <span>🥉 Premier calcul</span>
+                <span class="achievement-status">🔒</span>
+            </div>
+            <div class="achievement locked" data-key="saver">
+                <span>🥈 Fan de stats</span>
+                <span class="achievement-status">🔒</span>
+            </div>
+            <div class="achievement locked" data-key="highroller">
+                <span>🥇 Gros poisson</span>
+                <span class="achievement-status">🔒</span>
+            </div>
+        </div>
+    </div>
+    <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 <script>
     (() => {
         const DEFAULTS = {
-            basic: { tj: 600, activeH: 7.5, poopMin: 6, oneWaySec: 30 },
-            advanced: { tj: 800, activeH: 8, poopMin: 8, oneWaySec: 45, productivity: 85, urgency: 'normal' },
-            enterprise: { tj: 1200, activeH: 9, poopMin: 10, oneWaySec: 60, productivity: 90, urgency: 'normal', teamSize: 5 }
+            basic: { tj: 600, activeH: 7.5, poopMin: 6, oneWaySec: 30, frequency: 2.5 },
+            advanced: { tj: 800, activeH: 8, poopMin: 8, oneWaySec: 45, productivity: 85, urgency: 'normal', frequency: 3 },
+            enterprise: { tj: 1200, activeH: 9, poopMin: 10, oneWaySec: 60, productivity: 90, urgency: 'normal', teamSize: 5, meetingCost: 0, frequency: 4 }
         };
+        const MODE_LABELS = { basic: 'Basic', advanced: 'Avancé', enterprise: 'Enterprise' };
 
         // State
         let currentMode = 'basic';
-        let stats = JSON.parse(localStorage.getItem('poopStats') || '{"calculations":0,"totalCost":0,"totalTime":0}');
-        let history = JSON.parse(localStorage.getItem('poopHistory') || '[]');
+        const DEFAULT_STATS = { calculations: 0, totalCost: 0, totalTime: 0 };
+
+        const readStorage = (key, fallback) => {
+            try {
+                const raw = localStorage.getItem(key);
+                if (!raw) return JSON.parse(JSON.stringify(fallback));
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(fallback)) return Array.isArray(parsed) ? parsed : [];
+                return typeof parsed === 'object' && parsed ? parsed : JSON.parse(JSON.stringify(fallback));
+            } catch {
+                return JSON.parse(JSON.stringify(fallback));
+            }
+        };
+
+        const storedStats = readStorage('poopStats', DEFAULT_STATS);
+        let stats = { ...DEFAULT_STATS, ...storedStats };
+        stats.calculations = Number(stats.calculations) || 0;
+        stats.totalCost = Number(stats.totalCost) || 0;
+        stats.totalTime = Number(stats.totalTime) || 0;
+        const storedHistory = readStorage('poopHistory', []);
+        let history = Array.isArray(storedHistory) ? storedHistory : [];
         let theme = localStorage.getItem('poopTheme') || 'dark';
+        const storedAchievementsList = readStorage('poopAchievements', []);
+        const unlockedAchievements = new Set(Array.isArray(storedAchievementsList) ? storedAchievementsList : []);
 
         // Elements
         const el = id => document.getElementById(id);
         const body = document.body;
-        const tj = el('tj'), activeH = el('activeH'), poopMin = el('poopMin'), oneWaySec = el('oneWaySec');
+        const tj = el('tj'), activeH = el('activeH'), poopMin = el('poopMin'), oneWaySec = el('oneWaySec'), frequency = el('frequency');
         const price = el('price'), priceAnimation = el('priceAnimation'), efficiencyTag = el('efficiencyTag');
+        const resultCard = el('result');
         const title = el('title'), themeToggle = el('themeToggle'), themeIcon = el('themeIcon'), themeText = el('themeText');
-        const inputGrid = el('inputGrid'), historyList = el('historyList');
+        const inputGrid = el('inputGrid'), historyList = el('historyList'), modeExtras = el('modeExtras');
         const totalCalculations = el('totalCalculations'), avgCost = el('avgCost'), totalTime = el('totalTime'), dailyLoss = el('dailyLoss');
+        const insightsEls = {
+            daily: el('insightDaily'),
+            monthly: el('insightMonthly'),
+            yearly: el('insightYearly'),
+            time: el('insightTime'),
+            coffees: el('insightCoffees')
+        };
+        const sparklinePath = document.getElementById('sparklinePath');
+        const timerDisplay = el('timerDisplay'), timerStatus = el('timerStatus'), timerAutoFill = el('timerAutoFill');
+        const timerStartBtn = el('timerStart'), timerPauseBtn = el('timerPause'), timerApplyBtn = el('timerApply');
+        const toastContainer = el('toastContainer');
+        const achievementNodes = Array.from(document.querySelectorAll('.achievement'));
+        const achievementMap = achievementNodes.reduce((acc, node) => {
+            acc[node.dataset.key] = node;
+            return acc;
+        }, {});
+        const timerState = { running: false, start: 0, elapsed: 0, interval: null };
+        const timerAutoFillBase = timerAutoFill ? timerAutoFill.textContent : '';
 
         // Utilities
         const fmtMoney = (n) => new Intl.NumberFormat('fr-FR', {style:'currency', currency:'EUR', minimumFractionDigits:2, maximumFractionDigits:2}).format(n);
         const fmtTime = (min) => min > 60 ? `${Math.floor(min/60)}h ${Math.round(min%60)}min` : `${Math.round(min)}min`;
         const randomEmoji = () => ['💸','💰','🤑','💵','💴','💶','💷'][Math.floor(Math.random()*7)];
+        const formatFrequency = (value) => {
+            const num = Number(value);
+            return Number.isFinite(num) && num > 0 ? `${num.toLocaleString('fr-FR', { maximumFractionDigits: 1 })}/j` : '';
+        };
         const playSound = (freq, duration) => {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -305,67 +463,77 @@
         }
 
         function updateInputsForMode(mode) {
-            const advancedInputs = `
-                <div class="full">
-                    <label for="productivity">Productivité habituelle (%)</label>
-                    <div class="input-group">
-                        <input id="productivity" type="range" min="50" max="100" step="5" />
-                        <span class="input-suffix" id="productivityValue">85%</span>
-                    </div>
-                </div>
-                <div class="full">
-                    <label for="urgency">Urgence du besoin</label>
-                    <select id="urgency">
-                        <option value="low">😌 Tranquille</option>
-                        <option value="normal" selected>😐 Normal</option>
-                        <option value="high">😰 Urgent</option>
-                        <option value="emergency">🚨 URGENCE!</option>
-                    </select>
-                </div>
-            `;
-
-            const enterpriseInputs = advancedInputs + `
-                <div>
-                    <label for="teamSize">Taille équipe</label>
-                    <div class="input-group">
-                        <input id="teamSize" type="number" min="1" step="1" />
-                        <span class="input-suffix">pers.</span>
-                    </div>
-                </div>
-                <div>
-                    <label for="meetingCost">Coût/h réunion</label>
-                    <div class="input-group">
-                        <input id="meetingCost" type="number" min="0" step="50" />
-                        <span class="input-suffix">€</span>
-                    </div>
-                </div>
-            `;
-
-            // Clear existing advanced inputs
-            inputGrid.querySelectorAll('.advanced-input, .enterprise-input').forEach(el => el.remove());
+            modeExtras.innerHTML = '';
+            modeExtras.dataset.mode = mode;
 
             if (mode === 'advanced' || mode === 'enterprise') {
-                const resultEl = inputGrid.querySelector('.result').parentNode;
-                resultEl.insertAdjacentHTML('beforebegin', `<div class="full advanced-input">${advancedInputs}</div>`);
+                const advancedMarkup = `
+                    <div class="extra-grid">
+                        <div>
+                            <label for="productivity">Productivité habituelle (%)</label>
+                            <div class="range-row">
+                                <input id="productivity" type="range" min="50" max="100" step="5" />
+                                <span class="range-value" id="productivityValue">85%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="urgency">Urgence du besoin</label>
+                            <select id="urgency">
+                                <option value="low">😌 Tranquille</option>
+                                <option value="normal" selected>😐 Normal</option>
+                                <option value="high">😰 Urgent</option>
+                                <option value="emergency">🚨 URGENCE!</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
 
-                if (mode === 'enterprise') {
-                    resultEl.insertAdjacentHTML('beforebegin', `<div class="enterprise-input">${enterpriseInputs.replace(advancedInputs, '')}</div>`);
-                }
+                const enterpriseMarkup = `
+                    <div class="extra-grid extra-grid--split">
+                        <div>
+                            <label for="teamSize">Taille équipe</label>
+                            <div class="input-group">
+                                <input id="teamSize" type="number" min="1" step="1" />
+                                <span class="input-suffix">pers.</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="meetingCost">Coût/h réunion</label>
+                            <div class="input-group">
+                                <input id="meetingCost" type="number" min="0" step="50" />
+                                <span class="input-suffix">€</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
 
-                // Add event listeners for new inputs
-                const productivitySlider = el('productivity');
-                const productivityValue = el('productivityValue');
-                if (productivitySlider) {
-                    productivitySlider.addEventListener('input', () => {
-                        productivityValue.textContent = productivitySlider.value + '%';
-                        compute();
-                    });
-                }
+                modeExtras.innerHTML = advancedMarkup + (mode === 'enterprise' ? enterpriseMarkup : '');
+            }
 
-                [el('urgency'), el('teamSize'), el('meetingCost')].forEach(input => {
-                    if (input) input.addEventListener('input', compute);
+            attachModeExtrasListeners();
+        }
+
+        function updateProductivityDisplay() {
+            const slider = el('productivity');
+            const label = el('productivityValue');
+            if (slider && label) label.textContent = `${slider.value}%`;
+        }
+
+        function attachModeExtrasListeners() {
+            const productivitySlider = el('productivity');
+
+            if (productivitySlider) {
+                updateProductivityDisplay();
+                productivitySlider.addEventListener('input', () => {
+                    updateProductivityDisplay();
+                    compute();
                 });
             }
+
+            ['urgency', 'teamSize', 'meetingCost'].forEach(id => {
+                const control = el(id);
+                if (control) control.addEventListener('input', compute);
+            });
         }
 
         // Enhanced computation
@@ -374,6 +542,7 @@
             const H = Math.max(0.0001, Number(activeH.value || 0));
             const poopM = Math.max(0, Number(poopMin.value || 0));
             const oneS = Math.max(0, Number(oneWaySec.value || 0));
+            const freq = Math.max(0, Number(frequency?.value || 0));
 
             const activeMin = H * 60;
             const perMin = TJ / activeMin;
@@ -411,6 +580,10 @@
             // Efficiency rating
             const efficiency = cost < 2 ? '🟢 Efficace' : cost < 5 ? '🟡 Moyen' : '🔴 Coûteux';
             efficiencyTag.textContent = efficiency;
+            if (resultCard) {
+                const tone = cost < 2 ? 'success' : cost < 5 ? 'warning' : 'danger';
+                resultCard.dataset.tone = tone;
+            }
 
             // Animation on change
             if (oldPrice !== '—' && oldPrice !== price.textContent) {
@@ -421,19 +594,40 @@
                 if (cost > 10) playSound(200, 100);
             }
 
-            return { cost, totalMinutes, efficiency };
+            const dailyCost = cost * freq;
+            const monthlyCost = dailyCost * 22;
+            const yearlyCost = dailyCost * 220;
+            const dailyMinutes = totalMinutes * freq;
+
+            const result = { cost, totalMinutes, efficiency, freq, dailyCost, monthlyCost, yearlyCost, dailyMinutes };
+            updateInsights(result);
+
+            return result;
         }
 
         // History management
         function saveCalculation() {
             const calc = compute();
             const timestamp = new Date().toISOString();
+            const inputs = {
+                tj: tj.value,
+                activeH: activeH.value,
+                poopMin: poopMin.value,
+                oneWaySec: oneWaySec.value,
+                frequency: frequency.value
+            };
+
+            ['productivity', 'urgency', 'teamSize', 'meetingCost'].forEach(id => {
+                const node = el(id);
+                if (node) inputs[id] = node.value;
+            });
+
             const entry = {
                 timestamp,
                 cost: calc.cost,
                 time: calc.totalMinutes,
                 mode: currentMode,
-                inputs: { tj: tj.value, activeH: activeH.value, poopMin: poopMin.value, oneWaySec: oneWaySec.value }
+                inputs
             };
 
             history.unshift(entry);
@@ -448,6 +642,7 @@
 
             updateStats();
             updateHistory();
+            evaluateAchievements();
 
             // Success animation
             title.classList.add('pulse');
@@ -456,7 +651,7 @@
 
         function updateStats() {
             totalCalculations.textContent = stats.calculations;
-            avgCost.textContent = stats.calculations > 0 ? fmtMoney(stats.totalCost / stats.calculations) : '0€';
+            avgCost.textContent = stats.calculations > 0 ? fmtMoney(stats.totalCost / stats.calculations) : fmtMoney(0);
             totalTime.textContent = fmtTime(stats.totalTime);
 
             // Daily loss estimation (assuming 3 times per day)
@@ -464,49 +659,262 @@
             dailyLoss.textContent = fmtMoney(dailyCost);
         }
 
+        function updateInsights(calc) {
+            if (!insightsEls.daily) return;
+
+            if (calc.freq > 0) {
+                insightsEls.daily.textContent = fmtMoney(calc.dailyCost);
+                insightsEls.monthly.textContent = fmtMoney(calc.monthlyCost);
+                insightsEls.yearly.textContent = fmtMoney(calc.yearlyCost);
+                insightsEls.time.textContent = fmtTime(calc.dailyMinutes);
+
+                const coffeePrice = 2.5;
+                const coffees = calc.dailyCost / coffeePrice;
+                const coffeeText = coffees >= 10 ? `${Math.round(coffees)} ☕` : `${coffees.toFixed(1)} ☕`;
+                insightsEls.coffees.textContent = coffeeText;
+            } else {
+                insightsEls.daily.textContent = '—';
+                insightsEls.monthly.textContent = '—';
+                insightsEls.yearly.textContent = '—';
+                insightsEls.time.textContent = '—';
+                insightsEls.coffees.textContent = '—';
+            }
+        }
+
         function updateHistory() {
             if (history.length === 0) {
                 historyList.innerHTML = '<div style="text-align:center; color:var(--muted); font-style:italic">Aucun calcul encore</div>';
+                updateSparkline();
                 return;
             }
 
-            historyList.innerHTML = history.slice(0, 10).map(entry => `
+            historyList.innerHTML = history.slice(0, 10).map(entry => {
+                const freqLabel = formatFrequency(entry.inputs?.frequency);
+                const costValue = Number(entry.cost) || 0;
+                return `
                 <div class="history-item" onclick="loadFromHistory('${entry.timestamp}')">
-                    <div class="history-price">${fmtMoney(entry.cost)}</div>
+                    <div class="history-price">${fmtMoney(costValue)}</div>
                     <div class="history-details">
-                        ${new Date(entry.timestamp).toLocaleDateString('fr')} • ${fmtTime(entry.time)} • ${entry.mode}
+                        ${new Date(entry.timestamp).toLocaleDateString('fr')} • ${fmtTime(entry.time)} • ${MODE_LABELS[entry.mode] || entry.mode}${freqLabel ? ` • ${freqLabel}` : ''}
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
+
+            updateSparkline();
+        }
+
+        function updateSparkline() {
+            if (!sparklinePath) return;
+
+            const recent = history.slice(0, 12).map(entry => Number(entry.cost) || 0).reverse();
+            if (recent.length === 0) {
+                sparklinePath.setAttribute('d', '');
+                sparklinePath.setAttribute('opacity', '0');
+                return;
+            }
+
+            const height = 40;
+            const width = 100;
+
+            if (recent.length === 1) {
+                const midY = height / 2;
+                sparklinePath.setAttribute('d', `M0,${midY} L${width},${midY}`);
+                sparklinePath.setAttribute('opacity', '0.35');
+                return;
+            }
+
+            const max = Math.max(...recent);
+            const min = Math.min(...recent);
+            const range = max - min || Math.max(max, 1);
+            const step = width / (recent.length - 1);
+
+            const path = recent.map((cost, index) => {
+                const normalized = range === 0 ? 0.5 : (cost - min) / range;
+                const y = height - (normalized * (height - 6)) - 3;
+                const x = index * step;
+                return `${index === 0 ? 'M' : 'L'}${x.toFixed(2)},${y.toFixed(2)}`;
+            }).join(' ');
+
+            sparklinePath.setAttribute('d', path);
+            sparklinePath.setAttribute('opacity', '1');
+        }
+
+        function showToast(message) {
+            if (!toastContainer) return;
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            toastContainer.appendChild(toast);
+
+            while (toastContainer.childElementCount > 4) {
+                toastContainer.firstElementChild?.remove();
+            }
+
+            setTimeout(() => toast.classList.add('hide'), 3500);
+            setTimeout(() => toast.remove(), 4100);
+        }
+
+        function setAchievementState(key, unlocked) {
+            const node = achievementMap[key];
+            if (!node) return;
+            node.classList.toggle('locked', !unlocked);
+            const statusEl = node.querySelector('.achievement-status');
+            if (statusEl) statusEl.textContent = unlocked ? '✅' : '🔒';
+        }
+
+        function highlightAchievement(key) {
+            const node = achievementMap[key];
+            if (!node) return;
+            node.classList.add('pulse');
+            setTimeout(() => node.classList.remove('pulse'), 1600);
+            const label = node.querySelector('span')?.textContent?.trim() || key;
+            showToast(`Succès débloqué : ${label}`);
+        }
+
+        function evaluateAchievements({ silent = false } = {}) {
+            const highestCost = history.reduce((max, entry) => Math.max(max, Number(entry.cost) || 0), 0);
+            const conditions = {
+                first: stats.calculations > 0,
+                saver: history.length >= 5 || stats.totalTime >= 120,
+                highroller: highestCost >= 50
+            };
+
+            let updated = false;
+            Object.entries(conditions).forEach(([key, unlocked]) => {
+                if (unlocked && !unlockedAchievements.has(key)) {
+                    unlockedAchievements.add(key);
+                    updated = true;
+                    if (!silent) highlightAchievement(key);
+                }
+                setAchievementState(key, unlockedAchievements.has(key));
+            });
+
+            if (updated) {
+                localStorage.setItem('poopAchievements', JSON.stringify(Array.from(unlockedAchievements)));
+            }
+        }
+
+        function getTimerElapsed() {
+            return timerState.running ? timerState.elapsed + (Date.now() - timerState.start) : timerState.elapsed;
+        }
+
+        function formatTimer(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function updateTimerUI(statusText) {
+            if (!timerDisplay) return;
+            const elapsed = getTimerElapsed();
+            timerDisplay.textContent = formatTimer(elapsed);
+            if (statusText && timerStatus) timerStatus.textContent = statusText;
+            timerStatus?.classList.toggle('timer-running', timerState.running);
+
+            if (timerStartBtn) {
+                timerStartBtn.disabled = timerState.running;
+                timerStartBtn.textContent = !timerState.running && timerState.elapsed > 0 ? '🔁 Reprendre' : '▶️ Lancer';
+            }
+            if (timerPauseBtn) timerPauseBtn.disabled = !timerState.running;
+            if (timerApplyBtn) timerApplyBtn.disabled = elapsed < 5000;
+        }
+
+        function startTimer() {
+            if (!timerDisplay || timerState.running) return;
+            timerState.running = true;
+            timerState.start = Date.now();
+            timerState.interval = setInterval(() => updateTimerUI(), 250);
+            updateTimerUI('En cours…');
+        }
+
+        function pauseTimer(manual = true) {
+            if (!timerState.running) return;
+            timerState.elapsed += Date.now() - timerState.start;
+            timerState.running = false;
+            if (timerState.interval) {
+                clearInterval(timerState.interval);
+                timerState.interval = null;
+            }
+            updateTimerUI(manual ? 'En pause' : undefined);
+        }
+
+        function resetTimer(status = 'En attente') {
+            if (timerState.interval) {
+                clearInterval(timerState.interval);
+                timerState.interval = null;
+            }
+            timerState.running = false;
+            timerState.start = 0;
+            timerState.elapsed = 0;
+            updateTimerUI(status);
+            if (timerAutoFill) timerAutoFill.textContent = timerAutoFillBase;
+        }
+
+        function applyTimer() {
+            const elapsed = getTimerElapsed();
+            if (elapsed < 5000) {
+                updateTimerUI('Session trop courte');
+                setTimeout(() => updateTimerUI('En attente'), 1200);
+                return;
+            }
+
+            pauseTimer(false);
+            const minutes = elapsed / 60000;
+            const rounded = Math.max(0.5, Number(minutes.toFixed(1)));
+            poopMin.value = rounded;
+            if (timerAutoFill) timerAutoFill.textContent = `Dernière durée enregistrée : ${rounded} min`;
+            compute();
+            saveCalculation();
+            showToast(`Durée appliquée (${rounded} min)`);
+            resetTimer('En attente');
         }
 
         function loadFromHistory(timestamp) {
             const entry = history.find(h => h.timestamp === timestamp);
             if (!entry) return;
 
+            if (entry.mode !== currentMode) switchMode(entry.mode);
+
             tj.value = entry.inputs.tj;
             activeH.value = entry.inputs.activeH;
             poopMin.value = entry.inputs.poopMin;
             oneWaySec.value = entry.inputs.oneWaySec;
+            if (entry.inputs.frequency !== undefined) frequency.value = entry.inputs.frequency;
 
-            if (entry.mode !== currentMode) switchMode(entry.mode);
+            ['productivity', 'urgency', 'teamSize', 'meetingCost'].forEach(id => {
+                if (entry.inputs[id] !== undefined && el(id)) {
+                    el(id).value = entry.inputs[id];
+                }
+            });
+            updateProductivityDisplay();
+
             compute();
         }
 
         // Export functionality
         function exportToCSV() {
             const csv = [
-                'Date,Coût,Temps (min),Mode,TJ,Heures,Durée poop,Trajet',
-                ...history.map(h => [
-                    new Date(h.timestamp).toLocaleDateString('fr'),
-                    h.cost.toFixed(2),
-                    h.time.toFixed(1),
-                    h.mode,
-                    h.inputs.tj,
-                    h.inputs.activeH,
-                    h.inputs.poopMin,
-                    h.inputs.oneWaySec
-                ].join(','))
+                'Date,Coût,Temps (min),Mode,TJ,Heures,Durée poop,Trajet,Fréquence,Productivité,Urgence,Équipe,Coût réunion',
+                ...history.map(h => {
+                    const inputs = h.inputs || {};
+                    return [
+                        new Date(h.timestamp).toLocaleDateString('fr'),
+                        Number(h.cost || 0).toFixed(2),
+                        Number(h.time || 0).toFixed(1),
+                        h.mode,
+                        inputs.tj ?? '',
+                        inputs.activeH ?? '',
+                        inputs.poopMin ?? '',
+                        inputs.oneWaySec ?? '',
+                        inputs.frequency ?? '',
+                        inputs.productivity ?? '',
+                        inputs.urgency ?? '',
+                        inputs.teamSize ?? '',
+                        inputs.meetingCost ?? ''
+                    ].join(',');
+                })
             ].join('\n');
 
             const blob = new Blob([csv], { type: 'text/csv' });
@@ -521,7 +929,8 @@
         // Share functionality
         async function shareResults() {
             const calc = compute();
-            const text = `J'ai calculé que mon 💩 me coûte ${fmtMoney(calc.cost)} ! Calculez le vôtre sur Poop Price Calculator 💩`;
+            const freqInfo = calc.freq > 0 ? ` (${calc.freq.toLocaleString('fr-FR')}x/jour)` : '';
+            const text = `J'ai calculé que mon 💩 me coûte ${fmtMoney(calc.cost)}${freqInfo} ! Calculez le vôtre sur Poop Price Calculator 💩`;
 
             if (navigator.share) {
                 try {
@@ -532,9 +941,12 @@
 
         function fallbackShare(text) {
             navigator.clipboard?.writeText(text);
-            const originalText = document.querySelector('#shareBtn').textContent;
-            document.querySelector('#shareBtn').textContent = '✅ Copié!';
-            setTimeout(() => document.querySelector('#shareBtn').textContent = originalText, 2000);
+            const shareBtn = el('shareBtn');
+            if (!shareBtn) return;
+            const originalText = shareBtn.textContent;
+            shareBtn.textContent = '✅ Copié!';
+            showToast('Texte copié dans le presse-papiers');
+            setTimeout(() => shareBtn.textContent = originalText, 2000);
         }
 
         // Easter eggs
@@ -562,12 +974,15 @@
         // Reset function
         function resetAll() {
             if (confirm('Réinitialiser tous les paramètres et données ?')) {
-                localStorage.clear();
-                stats = { calculations: 0, totalCost: 0, totalTime: 0 };
+                ['poopStats', 'poopHistory', 'poopAchievements'].forEach(key => localStorage.removeItem(key));
+                stats = JSON.parse(JSON.stringify(DEFAULT_STATS));
                 history = [];
+                unlockedAchievements.clear();
+                achievementNodes.forEach(node => setAchievementState(node.dataset.key, false));
                 loadDefaults();
                 updateStats();
                 updateHistory();
+                resetTimer('En attente');
                 title.classList.add('shake');
                 setTimeout(() => title.classList.remove('shake'), 500);
             }
@@ -575,17 +990,28 @@
 
         // Load defaults
         function loadDefaults() {
-            const defaults = DEFAULTS[currentMode];
+            const defaults = DEFAULTS[currentMode] || DEFAULTS.basic;
             tj.value = defaults.tj;
             activeH.value = defaults.activeH;
             poopMin.value = defaults.poopMin;
             oneWaySec.value = defaults.oneWaySec;
+            frequency.value = defaults.frequency ?? 2;
 
             // Set advanced inputs if they exist
-            if (el('productivity')) el('productivity').value = defaults.productivity || 85;
-            if (el('urgency')) el('urgency').value = defaults.urgency || 'normal';
-            if (el('teamSize')) el('teamSize').value = defaults.teamSize || 1;
-            if (el('meetingCost')) el('meetingCost').value = defaults.meetingCost || 0;
+            const productivityInput = el('productivity');
+            if (productivityInput) {
+                productivityInput.value = defaults.productivity ?? 85;
+                updateProductivityDisplay();
+            }
+
+            const urgencySelect = el('urgency');
+            if (urgencySelect) urgencySelect.value = defaults.urgency ?? 'normal';
+
+            const teamInput = el('teamSize');
+            if (teamInput) teamInput.value = defaults.teamSize ?? 1;
+
+            const meetingInput = el('meetingCost');
+            if (meetingInput) meetingInput.value = defaults.meetingCost ?? 0;
 
             compute();
         }
@@ -596,7 +1022,7 @@
             btn.addEventListener('click', () => switchMode(btn.dataset.mode));
         });
 
-        [tj, activeH, poopMin, oneWaySec].forEach(input => input.addEventListener('input', compute));
+        [tj, activeH, poopMin, oneWaySec, frequency].forEach(input => input?.addEventListener('input', compute));
 
         el('saveBtn').addEventListener('click', saveCalculation);
         el('shareBtn').addEventListener('click', shareResults);
@@ -609,6 +1035,13 @@
                 updateHistory();
             }
         });
+        timerStartBtn?.addEventListener('click', startTimer);
+        timerPauseBtn?.addEventListener('click', pauseTimer);
+        timerApplyBtn?.addEventListener('click', applyTimer);
+        timerDisplay?.addEventListener('dblclick', () => {
+            resetTimer('En attente');
+            showToast('Minuteur remis à zéro');
+        });
 
         // Initialize
         function init() {
@@ -619,9 +1052,11 @@
             loadDefaults();
             updateStats();
             updateHistory();
+            evaluateAchievements({ silent: true });
+            updateTimerUI('En attente');
 
             // Auto-save every calculation
-            [tj, activeH, poopMin, oneWaySec].forEach(input => {
+            [tj, activeH, poopMin, oneWaySec, frequency].forEach(input => {
                 input.addEventListener('change', () => {
                     if (input.value && compute().cost > 0) saveCalculation();
                 });
@@ -636,3 +1071,6 @@
 </script>
 </body>
 </html>
+
+
+
