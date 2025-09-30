@@ -1,140 +1,638 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Poop Price Calculator</title>
-<style>
-  :root{
-    --bg:#0a0f1a; --bg2:#0c1324; --card:#0f1a33; --text:#e6edf3; --muted:#9aa4b2;
-    --accent:#6ea8ff; --accent2:#22d3ee; --ring: rgba(110,168,255,.25);
-    --radius:16px;
-  }
-  *{box-sizing:border-box} html,body{height:100%}
-  body{
-    margin:0; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-    color:var(--text);
-    background:
-      radial-gradient(1000px 700px at 10% -10%, #142955 0%, transparent 55%),
-      radial-gradient(900px 600px at 100% 0%, #0b2e38 0%, transparent 60%),
-      linear-gradient(180deg,var(--bg),var(--bg2));
-    display:flex; align-items:center; justify-content:center; padding:24px;
-  }
-  .wrap{width:100%; max-width:560px}
-  h1{
-    margin:0 0 10px; text-align:center; font-size:clamp(22px,4vw,34px); font-weight:900;
-    background:linear-gradient(90deg,var(--accent),var(--accent2));
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-    text-shadow:0 0 30px rgba(110,168,255,.25);
-  }
-  .subtitle{margin:0 0 16px; text-align:center; color:var(--muted); font-size:.95rem}
-  .card{
-    background:rgba(15,26,51,.7); border:1px solid rgba(255,255,255,.06);
-    border-radius:var(--radius); box-shadow:0 12px 40px rgba(0,0,0,.45);
-    backdrop-filter: blur(6px); padding:18px;
-  }
-  .grid{display:grid; gap:12px}
-  @media (min-width:640px){ .grid{grid-template-columns:1fr 1fr} }
-  label{font-size:.9rem; color:#cbd5e1}
-  input{
-    width:100%; border-radius:12px; padding:.75rem .9rem; background:#0b152a;
-    color:var(--text); border:1px solid rgba(148,163,184,.25); outline:none;
-  }
-  input:focus{border-color:#6ea8ff; box-shadow:0 0 0 4px var(--ring)}
-  .full{grid-column:1/-1}
-  .result{
-    margin-top:14px; padding:18px; border-radius:12px; background:#0b152a;
-    border:1px solid rgba(148,163,184,.2); text-align:center;
-  }
-  .price{font-size:clamp(26px,5vw,40px); font-weight:900}
-  .tag{display:inline-flex; gap:8px; align-items:center; padding:.4rem .7rem; border-radius:999px;
-       background:#0e1a30; border:1px solid rgba(148,163,184,.25); color:var(--muted); font-size:.85rem}
-  .footer{margin-top:8px; text-align:center; color:var(--muted); font-size:.8rem}
-</style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Poop Price Calculator 💩</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💩</text></svg>">
+    <style>
+        :root{
+            --bg:#0a0f1a; --bg2:#0c1324; --card:#0f1a33; --text:#e6edf3; --muted:#9aa4b2;
+            --accent:#6ea8ff; --accent2:#22d3ee; --ring: rgba(110,168,255,.25);
+            --radius:16px; --success:#22c55e; --warning:#f59e0b; --danger:#ef4444;
+            --transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        [data-theme="light"]{
+            --bg:#f8fafc; --bg2:#f1f5f9; --card:#ffffff; --text:#1e293b; --muted:#64748b;
+            --accent:#3b82f6; --accent2:#06b6d4; --ring: rgba(59,130,246,.25);
+        }
+        *{box-sizing:border-box; transition:var(--transition)}
+        html,body{height:100%}
+        body{
+            margin:0; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+            color:var(--text); overflow-x:hidden;
+            background:
+                    radial-gradient(1000px 700px at 10% -10%, #142955 0%, transparent 55%),
+                    radial-gradient(900px 600px at 100% 0%, #0b2e38 0%, transparent 60%),
+                    linear-gradient(180deg,var(--bg),var(--bg2));
+            display:flex; align-items:flex-start; justify-content:center; padding:24px; gap:24px;
+            min-height:100vh;
+        }
+        [data-theme="light"] body{
+            background:
+                    radial-gradient(1000px 700px at 10% -10%, #dbeafe 0%, transparent 55%),
+                    radial-gradient(900px 600px at 100% 0%, #f0f9ff 0%, transparent 60%),
+                    linear-gradient(180deg,var(--bg),var(--bg2));
+        }
+        .main-wrap{width:100%; max-width:560px}
+        .side-wrap{width:100%; max-width:400px; position:sticky; top:24px}
+        @media (max-width:1200px){
+            body{flex-direction:column; align-items:center}
+            .side-wrap{position:relative; top:0}
+        }
+        .header-controls{display:flex; justify-content:space-between; align-items:center; margin-bottom:24px}
+        .theme-toggle{
+            background:var(--card); border:1px solid rgba(255,255,255,.06); border-radius:12px;
+            padding:8px 12px; cursor:pointer; display:flex; align-items:center; gap:8px;
+            font-size:.9rem; color:var(--muted);
+        }
+        .theme-toggle:hover{background:rgba(255,255,255,.05)}
+        h1{
+            margin:0; text-align:center; font-size:clamp(22px,4vw,34px); font-weight:900;
+            background:linear-gradient(90deg,var(--accent),var(--accent2));
+            -webkit-background-clip:text; background-clip:text; color:transparent;
+            text-shadow:0 0 30px rgba(110,168,255,.25); cursor:pointer;
+        }
+        .subtitle{margin:0 0 16px; text-align:center; color:var(--muted); font-size:.95rem}
+        .card{
+            background:rgba(15,26,51,.7); border:1px solid rgba(255,255,255,.06);
+            border-radius:var(--radius); box-shadow:0 12px 40px rgba(0,0,0,.45);
+            backdrop-filter: blur(6px); padding:18px; margin-bottom:20px;
+        }
+        [data-theme="light"] .card{
+            background:var(--card); border:1px solid #e2e8f0;
+            box-shadow:0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1);
+        }
+        .grid{display:grid; gap:12px}
+        @media (min-width:640px){ .grid{grid-template-columns:1fr 1fr} }
+        label{font-size:.9rem; color:var(--muted); display:block; margin-bottom:6px}
+        input, select{
+            width:100%; border-radius:12px; padding:.75rem .9rem; background:#0b152a;
+            color:var(--text); border:1px solid rgba(148,163,184,.25); outline:none;
+            font-size:.95rem;
+        }
+        [data-theme="light"] input, [data-theme="light"] select{
+            background:#f8fafc; border:1px solid #cbd5e1;
+        }
+        input:focus, select:focus{border-color:var(--accent); box-shadow:0 0 0 4px var(--ring)}
+        .input-group{position:relative}
+        .input-suffix{position:absolute; right:12px; top:50%; transform:translateY(-50%);
+                      color:var(--muted); font-size:.85rem; pointer-events:none}
+        .full{grid-column:1/-1}
+        .result{
+            margin-top:14px; padding:18px; border-radius:12px; background:#0b152a;
+            border:1px solid rgba(148,163,184,.2); text-align:center; position:relative;
+            overflow:hidden;
+        }
+        [data-theme="light"] .result{background:#f8fafc; border:1px solid #cbd5e1}
+        .price{font-size:clamp(26px,5vw,40px); font-weight:900; position:relative; z-index:2}
+        .price-animation{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(0);
+                        font-size:2rem; opacity:0; z-index:1; pointer-events:none}
+        .price-animation.animate{animation:priceBoost 0.6s ease-out}
+        @keyframes priceBoost{
+            0%{transform:translate(-50%,-50%) scale(0); opacity:1}
+            50%{transform:translate(-50%,-50%) scale(1.2); opacity:0.8}
+            100%{transform:translate(-50%,-50%) scale(2); opacity:0}
+        }
+        .tag{display:inline-flex; gap:8px; align-items:center; padding:.4rem .7rem; border-radius:999px;
+            background:#0e1a30; border:1px solid rgba(148,163,184,.25); color:var(--muted); font-size:.85rem;
+            margin:4px 2px}
+        [data-theme="light"] .tag{background:#f1f5f9; border:1px solid #cbd5e1}
+        .footer{margin-top:8px; text-align:center; color:var(--muted); font-size:.8rem}
+        .stats-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px}
+        .stat-card{padding:12px; border-radius:12px; background:#0b152a; border:1px solid rgba(148,163,184,.1);
+                   text-align:center}
+        [data-theme="light"] .stat-card{background:#f8fafc; border:1px solid #e2e8f0}
+        .stat-value{font-size:1.5rem; font-weight:700; color:var(--accent)}
+        .stat-label{font-size:.75rem; color:var(--muted); margin-top:4px}
+        .history-list{max-height:300px; overflow-y:auto}
+        .history-item{padding:12px; border-radius:8px; background:#0b152a; margin-bottom:8px;
+                      border:1px solid rgba(148,163,184,.1); cursor:pointer}
+        [data-theme="light"] .history-item{background:#f8fafc; border:1px solid #e2e8f0}
+        .history-item:hover{background:rgba(255,255,255,.02)}
+        [data-theme="light"] .history-item:hover{background:#f1f5f9}
+        .history-price{font-weight:600; color:var(--accent)}
+        .history-details{font-size:.8rem; color:var(--muted); margin-top:4px}
+        .btn{padding:8px 16px; border-radius:8px; border:none; cursor:pointer; font-size:.9rem;
+             display:inline-flex; align-items:center; gap:8px; text-decoration:none}
+        .btn-primary{background:var(--accent); color:white}
+        .btn-secondary{background:var(--card); color:var(--text); border:1px solid rgba(255,255,255,.1)}
+        [data-theme="light"] .btn-secondary{border:1px solid #e2e8f0}
+        .btn:hover{opacity:.9; transform:translateY(-1px)}
+        .btn-group{display:flex; gap:8px; flex-wrap:wrap; justify-content:center}
+        .mode-selector{display:flex; background:#0b152a; border-radius:12px; padding:4px; margin-bottom:16px}
+        [data-theme="light"] .mode-selector{background:#f1f5f9; border:1px solid #e2e8f0}
+        .mode-btn{flex:1; padding:8px 12px; border-radius:8px; border:none; background:transparent;
+                  color:var(--muted); cursor:pointer; font-size:.85rem}
+        .mode-btn.active{background:var(--accent); color:white}
+        .easter-egg{position:fixed; pointer-events:none; z-index:1000; font-size:2rem}
+        .shake{animation:shake 0.5s ease-in-out}
+        @keyframes shake{
+            0%,100%{transform:translateX(0)}
+            25%{transform:translateX(-5px)}
+            75%{transform:translateX(5px)}
+        }
+        .pulse{animation:pulse 2s infinite}
+        @keyframes pulse{
+            0%,100%{opacity:1}
+            50%{opacity:.5}
+        }
+        @media (max-width:640px){
+            body{padding:16px}
+            .header-controls{flex-direction:column; gap:12px}
+        }
+    </style>
 </head>
-<body>
-  <div class="wrap">
-    <h1>Poop Price Calculator</h1>
+<body data-theme="dark">
+<div class="main-wrap">
+    <div class="header-controls">
+        <h1 id="title">Poop Price Calculator</h1>
+        <button class="theme-toggle" id="themeToggle">
+            <span id="themeIcon">🌙</span>
+            <span id="themeText">Mode sombre</span>
+        </button>
+    </div>
     <p class="subtitle">💩 + 🚽 → prix instantané (trajet aller&nbsp;+&nbsp;retour inclus)</p>
 
     <div class="card">
-      <div class="grid">
-        <div>
-          <label for="tj">Taux journalier (€/jour)</label>
-          <input id="tj" type="number" min="0" step="1" inputmode="numeric" />
-        </div>
-        <div>
-          <label for="activeH">Temps facturable (heures)</label>
-          <input id="activeH" type="number" min="0.25" step="0.25" />
+        <div class="mode-selector">
+            <button class="mode-btn active" data-mode="basic">💰 Basic</button>
+            <button class="mode-btn" data-mode="advanced">📊 Avancé</button>
+            <button class="mode-btn" data-mode="enterprise">🏢 Enterprise</button>
         </div>
 
-        <div>
-          <label for="poopMin">Durée du 💩 (minutes)</label>
-          <input id="poopMin" type="number" min="0" step="1" inputmode="numeric" />
-        </div>
-        <div>
-          <label for="oneWaySec">Trajet 🚶→🚽 (secondes, aller)</label>
-          <input id="oneWaySec" type="number" min="0" step="1" inputmode="numeric" />
+        <div class="grid" id="inputGrid">
+            <div>
+                <label for="tj">Taux journalier (€/jour)</label>
+                <div class="input-group">
+                    <input id="tj" type="number" min="0" step="1" inputmode="numeric" />
+                    <span class="input-suffix">€</span>
+                </div>
+            </div>
+            <div>
+                <label for="activeH">Temps facturable (heures)</label>
+                <div class="input-group">
+                    <input id="activeH" type="number" min="0.25" step="0.25" />
+                    <span class="input-suffix">h</span>
+                </div>
+            </div>
+
+            <div>
+                <label for="poopMin">Durée du 💩 (minutes)</label>
+                <div class="input-group">
+                    <input id="poopMin" type="number" min="0" step="1" inputmode="numeric" />
+                    <span class="input-suffix">min</span>
+                </div>
+            </div>
+            <div>
+                <label for="oneWaySec">Trajet 🚶→🚽 (secondes, aller)</label>
+                <div class="input-group">
+                    <input id="oneWaySec" type="number" min="0" step="1" inputmode="numeric" />
+                    <span class="input-suffix">sec</span>
+                </div>
+            </div>
+
+            <div class="full result" id="result">
+                <div class="price-animation" id="priceAnimation">💸</div>
+                <div class="price" id="price">—</div>
+                <div>
+                    <div class="tag">Inclut le trajet aller&nbsp;+&nbsp;retour</div>
+                    <div class="tag" id="efficiencyTag">—</div>
+                </div>
+            </div>
         </div>
 
-        <div class="full result" id="result">
-          <div class="price" id="price">—</div>
-          <div class="tag">Inclut le trajet aller&nbsp;+&nbsp;retour</div>
+        <div class="btn-group">
+            <button class="btn btn-secondary" id="saveBtn">💾 Sauvegarder</button>
+            <button class="btn btn-secondary" id="shareBtn">📤 Partager</button>
+            <button class="btn btn-secondary" id="resetBtn">🔄 Reset</button>
         </div>
-      </div>
 
-      <div class="footer">Tout se met à jour au fil de la saisie. Valeurs par défaut appliquées.</div>
+        <div class="footer">Tout se met à jour au fil de la saisie. Valeurs par défaut appliquées.</div>
     </div>
-  </div>
+</div>
+
+<div class="side-wrap">
+    <div class="card">
+        <h3 style="margin:0 0 16px; color:var(--accent)">📈 Statistiques</h3>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalCalculations">0</div>
+                <div class="stat-label">Calculs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgCost">0€</div>
+                <div class="stat-label">Coût moyen</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalTime">0min</div>
+                <div class="stat-label">Temps total</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="dailyLoss">0€</div>
+                <div class="stat-label">Perte/jour</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 style="margin:0 0 16px; color:var(--accent)">📝 Historique</h3>
+        <div class="history-list" id="historyList">
+            <div style="text-align:center; color:var(--muted); font-style:italic">Aucun calcul encore</div>
+        </div>
+        <div class="btn-group" style="margin-top:12px">
+            <button class="btn btn-secondary" id="exportBtn">📊 Exporter CSV</button>
+            <button class="btn btn-secondary" id="clearHistoryBtn">🗑️ Vider</button>
+        </div>
+    </div>
+</div>
 
 <script>
-(() => {
-  const DEFAULTS = {
-    tj: 600,        // € / jour
-    activeH: 7.5,   // heures facturables (ex: 6 h 30)
-    poopMin: 6,     // minutes
-    oneWaySec: 30   // secondes (retour = aller, implicite)
-  };
+    (() => {
+        const DEFAULTS = {
+            basic: { tj: 600, activeH: 7.5, poopMin: 6, oneWaySec: 30 },
+            advanced: { tj: 800, activeH: 8, poopMin: 8, oneWaySec: 45, productivity: 85, urgency: 'normal' },
+            enterprise: { tj: 1200, activeH: 9, poopMin: 10, oneWaySec: 60, productivity: 90, urgency: 'normal', teamSize: 5 }
+        };
 
-  // Elements
-  const el = id => document.getElementById(id);
-  const tj = el('tj');
-  const activeH = el('activeH');
-  const poopMin = el('poopMin');
-  const oneWaySec = el('oneWaySec');
-  const price = el('price');
+        // State
+        let currentMode = 'basic';
+        let stats = JSON.parse(localStorage.getItem('poopStats') || '{"calculations":0,"totalCost":0,"totalTime":0}');
+        let history = JSON.parse(localStorage.getItem('poopHistory') || '[]');
+        let theme = localStorage.getItem('poopTheme') || 'dark';
 
-  const fmtMoney = (n) => new Intl.NumberFormat('fr-FR', {
-    style:'currency', currency:'EUR', minimumFractionDigits:2, maximumFractionDigits:2
-  }).format(n);
+        // Elements
+        const el = id => document.getElementById(id);
+        const body = document.body;
+        const tj = el('tj'), activeH = el('activeH'), poopMin = el('poopMin'), oneWaySec = el('oneWaySec');
+        const price = el('price'), priceAnimation = el('priceAnimation'), efficiencyTag = el('efficiencyTag');
+        const title = el('title'), themeToggle = el('themeToggle'), themeIcon = el('themeIcon'), themeText = el('themeText');
+        const inputGrid = el('inputGrid'), historyList = el('historyList');
+        const totalCalculations = el('totalCalculations'), avgCost = el('avgCost'), totalTime = el('totalTime'), dailyLoss = el('dailyLoss');
 
-  function compute(){
-    const TJ = Math.max(0, Number(tj.value || 0));
-    const H  = Math.max(0.0001, Number(activeH.value || 0)); // évite /0
-    const poopM = Math.max(0, Number(poopMin.value || 0));
-    const oneS  = Math.max(0, Number(oneWaySec.value || 0));
+        // Utilities
+        const fmtMoney = (n) => new Intl.NumberFormat('fr-FR', {style:'currency', currency:'EUR', minimumFractionDigits:2, maximumFractionDigits:2}).format(n);
+        const fmtTime = (min) => min > 60 ? `${Math.floor(min/60)}h ${Math.round(min%60)}min` : `${Math.round(min)}min`;
+        const randomEmoji = () => ['💸','💰','🤑','💵','💴','💶','💷'][Math.floor(Math.random()*7)];
+        const playSound = (freq, duration) => {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                osc.connect(ctx.destination);
+                osc.start(); osc.stop(ctx.currentTime + duration/1000);
+            } catch{}
+        };
 
-    const activeMin = H * 60;
-    const perMin = TJ / activeMin;
+        // Theme management
+        function toggleTheme() {
+            theme = theme === 'dark' ? 'light' : 'dark';
+            body.dataset.theme = theme;
+            themeIcon.textContent = theme === 'dark' ? '🌙' : '☀️';
+            themeText.textContent = theme === 'dark' ? 'Mode sombre' : 'Mode clair';
+            localStorage.setItem('poopTheme', theme);
+        }
 
-    const totalMinutes = poopM + (2 * oneS) / 60;
-    const cost = totalMinutes * perMin;
+        // Mode management
+        function switchMode(newMode) {
+            currentMode = newMode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-mode="${newMode}"]`).classList.add('active');
 
-    price.textContent = fmtMoney(cost);
-  }
+            // Update inputs based on mode
+            updateInputsForMode(newMode);
+            loadDefaults();
+        }
 
-  // Defaults + live compute
-  function init(){
-    tj.value = DEFAULTS.tj;
-    activeH.value = DEFAULTS.activeH;
-    poopMin.value = DEFAULTS.poopMin;
-    oneWaySec.value = DEFAULTS.oneWaySec;
-    compute();
-  }
+        function updateInputsForMode(mode) {
+            const advancedInputs = `
+                <div class="full">
+                    <label for="productivity">Productivité habituelle (%)</label>
+                    <div class="input-group">
+                        <input id="productivity" type="range" min="50" max="100" step="5" />
+                        <span class="input-suffix" id="productivityValue">85%</span>
+                    </div>
+                </div>
+                <div class="full">
+                    <label for="urgency">Urgence du besoin</label>
+                    <select id="urgency">
+                        <option value="low">😌 Tranquille</option>
+                        <option value="normal" selected>😐 Normal</option>
+                        <option value="high">😰 Urgent</option>
+                        <option value="emergency">🚨 URGENCE!</option>
+                    </select>
+                </div>
+            `;
 
-  [tj, activeH, poopMin, oneWaySec].forEach(i => i.addEventListener('input', compute));
-  init();
-})();
+            const enterpriseInputs = advancedInputs + `
+                <div>
+                    <label for="teamSize">Taille équipe</label>
+                    <div class="input-group">
+                        <input id="teamSize" type="number" min="1" step="1" />
+                        <span class="input-suffix">pers.</span>
+                    </div>
+                </div>
+                <div>
+                    <label for="meetingCost">Coût/h réunion</label>
+                    <div class="input-group">
+                        <input id="meetingCost" type="number" min="0" step="50" />
+                        <span class="input-suffix">€</span>
+                    </div>
+                </div>
+            `;
+
+            // Clear existing advanced inputs
+            inputGrid.querySelectorAll('.advanced-input, .enterprise-input').forEach(el => el.remove());
+
+            if (mode === 'advanced' || mode === 'enterprise') {
+                const resultEl = inputGrid.querySelector('.result').parentNode;
+                resultEl.insertAdjacentHTML('beforebegin', `<div class="full advanced-input">${advancedInputs}</div>`);
+
+                if (mode === 'enterprise') {
+                    resultEl.insertAdjacentHTML('beforebegin', `<div class="enterprise-input">${enterpriseInputs.replace(advancedInputs, '')}</div>`);
+                }
+
+                // Add event listeners for new inputs
+                const productivitySlider = el('productivity');
+                const productivityValue = el('productivityValue');
+                if (productivitySlider) {
+                    productivitySlider.addEventListener('input', () => {
+                        productivityValue.textContent = productivitySlider.value + '%';
+                        compute();
+                    });
+                }
+
+                [el('urgency'), el('teamSize'), el('meetingCost')].forEach(input => {
+                    if (input) input.addEventListener('input', compute);
+                });
+            }
+        }
+
+        // Enhanced computation
+        function compute() {
+            const TJ = Math.max(0, Number(tj.value || 0));
+            const H = Math.max(0.0001, Number(activeH.value || 0));
+            const poopM = Math.max(0, Number(poopMin.value || 0));
+            const oneS = Math.max(0, Number(oneWaySec.value || 0));
+
+            const activeMin = H * 60;
+            const perMin = TJ / activeMin;
+            const totalMinutes = poopM + (2 * oneS) / 60;
+            let cost = totalMinutes * perMin;
+
+            // Apply mode-specific calculations
+            if (currentMode === 'advanced' || currentMode === 'enterprise') {
+                const productivity = Number(el('productivity')?.value || 85) / 100;
+                const urgency = el('urgency')?.value || 'normal';
+
+                // Urgency multipliers
+                const urgencyMultipliers = { low: 0.8, normal: 1, high: 1.3, emergency: 2 };
+                cost *= urgencyMultipliers[urgency] || 1;
+
+                // Productivity adjustment
+                cost *= (2 - productivity); // Lower productivity = higher relative cost
+
+                if (currentMode === 'enterprise') {
+                    const teamSize = Number(el('teamSize')?.value || 1);
+                    const meetingCost = Number(el('meetingCost')?.value || 0);
+
+                    // Team impact (if blocking others)
+                    if (teamSize > 1) cost *= 1 + (teamSize - 1) * 0.1;
+
+                    // Meeting opportunity cost
+                    if (meetingCost > 0) cost += (meetingCost / 60) * totalMinutes;
+                }
+            }
+
+            // Update display
+            const oldPrice = price.textContent;
+            price.textContent = fmtMoney(cost);
+
+            // Efficiency rating
+            const efficiency = cost < 2 ? '🟢 Efficace' : cost < 5 ? '🟡 Moyen' : '🔴 Coûteux';
+            efficiencyTag.textContent = efficiency;
+
+            // Animation on change
+            if (oldPrice !== '—' && oldPrice !== price.textContent) {
+                priceAnimation.textContent = randomEmoji();
+                priceAnimation.classList.add('animate');
+                setTimeout(() => priceAnimation.classList.remove('animate'), 600);
+
+                if (cost > 10) playSound(200, 100);
+            }
+
+            return { cost, totalMinutes, efficiency };
+        }
+
+        // History management
+        function saveCalculation() {
+            const calc = compute();
+            const timestamp = new Date().toISOString();
+            const entry = {
+                timestamp,
+                cost: calc.cost,
+                time: calc.totalMinutes,
+                mode: currentMode,
+                inputs: { tj: tj.value, activeH: activeH.value, poopMin: poopMin.value, oneWaySec: oneWaySec.value }
+            };
+
+            history.unshift(entry);
+            if (history.length > 50) history = history.slice(0, 50); // Keep last 50
+
+            stats.calculations++;
+            stats.totalCost += calc.cost;
+            stats.totalTime += calc.totalMinutes;
+
+            localStorage.setItem('poopHistory', JSON.stringify(history));
+            localStorage.setItem('poopStats', JSON.stringify(stats));
+
+            updateStats();
+            updateHistory();
+
+            // Success animation
+            title.classList.add('pulse');
+            setTimeout(() => title.classList.remove('pulse'), 2000);
+        }
+
+        function updateStats() {
+            totalCalculations.textContent = stats.calculations;
+            avgCost.textContent = stats.calculations > 0 ? fmtMoney(stats.totalCost / stats.calculations) : '0€';
+            totalTime.textContent = fmtTime(stats.totalTime);
+
+            // Daily loss estimation (assuming 3 times per day)
+            const dailyCost = stats.calculations > 0 ? (stats.totalCost / stats.calculations) * 3 : 0;
+            dailyLoss.textContent = fmtMoney(dailyCost);
+        }
+
+        function updateHistory() {
+            if (history.length === 0) {
+                historyList.innerHTML = '<div style="text-align:center; color:var(--muted); font-style:italic">Aucun calcul encore</div>';
+                return;
+            }
+
+            historyList.innerHTML = history.slice(0, 10).map(entry => `
+                <div class="history-item" onclick="loadFromHistory('${entry.timestamp}')">
+                    <div class="history-price">${fmtMoney(entry.cost)}</div>
+                    <div class="history-details">
+                        ${new Date(entry.timestamp).toLocaleDateString('fr')} • ${fmtTime(entry.time)} • ${entry.mode}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadFromHistory(timestamp) {
+            const entry = history.find(h => h.timestamp === timestamp);
+            if (!entry) return;
+
+            tj.value = entry.inputs.tj;
+            activeH.value = entry.inputs.activeH;
+            poopMin.value = entry.inputs.poopMin;
+            oneWaySec.value = entry.inputs.oneWaySec;
+
+            if (entry.mode !== currentMode) switchMode(entry.mode);
+            compute();
+        }
+
+        // Export functionality
+        function exportToCSV() {
+            const csv = [
+                'Date,Coût,Temps (min),Mode,TJ,Heures,Durée poop,Trajet',
+                ...history.map(h => [
+                    new Date(h.timestamp).toLocaleDateString('fr'),
+                    h.cost.toFixed(2),
+                    h.time.toFixed(1),
+                    h.mode,
+                    h.inputs.tj,
+                    h.inputs.activeH,
+                    h.inputs.poopMin,
+                    h.inputs.oneWaySec
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `poop-calculator-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Share functionality
+        async function shareResults() {
+            const calc = compute();
+            const text = `J'ai calculé que mon 💩 me coûte ${fmtMoney(calc.cost)} ! Calculez le vôtre sur Poop Price Calculator 💩`;
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({ text, url: window.location.href });
+                } catch (e) { fallbackShare(text); }
+            } else { fallbackShare(text); }
+        }
+
+        function fallbackShare(text) {
+            navigator.clipboard?.writeText(text);
+            const originalText = document.querySelector('#shareBtn').textContent;
+            document.querySelector('#shareBtn').textContent = '✅ Copié!';
+            setTimeout(() => document.querySelector('#shareBtn').textContent = originalText, 2000);
+        }
+
+        // Easter eggs
+        function addEasterEgg() {
+            const egg = document.createElement('div');
+            egg.className = 'easter-egg';
+            egg.textContent = '💩';
+            egg.style.left = Math.random() * window.innerWidth + 'px';
+            egg.style.top = Math.random() * window.innerHeight + 'px';
+            document.body.appendChild(egg);
+
+            setTimeout(() => egg.remove(), 3000);
+        }
+
+        let clickCount = 0;
+        title.addEventListener('click', () => {
+            clickCount++;
+            if (clickCount >= 5) {
+                addEasterEgg();
+                playSound(440, 200);
+                clickCount = 0;
+            }
+        });
+
+        // Reset function
+        function resetAll() {
+            if (confirm('Réinitialiser tous les paramètres et données ?')) {
+                localStorage.clear();
+                stats = { calculations: 0, totalCost: 0, totalTime: 0 };
+                history = [];
+                loadDefaults();
+                updateStats();
+                updateHistory();
+                title.classList.add('shake');
+                setTimeout(() => title.classList.remove('shake'), 500);
+            }
+        }
+
+        // Load defaults
+        function loadDefaults() {
+            const defaults = DEFAULTS[currentMode];
+            tj.value = defaults.tj;
+            activeH.value = defaults.activeH;
+            poopMin.value = defaults.poopMin;
+            oneWaySec.value = defaults.oneWaySec;
+
+            // Set advanced inputs if they exist
+            if (el('productivity')) el('productivity').value = defaults.productivity || 85;
+            if (el('urgency')) el('urgency').value = defaults.urgency || 'normal';
+            if (el('teamSize')) el('teamSize').value = defaults.teamSize || 1;
+            if (el('meetingCost')) el('meetingCost').value = defaults.meetingCost || 0;
+
+            compute();
+        }
+
+        // Event listeners
+        themeToggle.addEventListener('click', toggleTheme);
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => switchMode(btn.dataset.mode));
+        });
+
+        [tj, activeH, poopMin, oneWaySec].forEach(input => input.addEventListener('input', compute));
+
+        el('saveBtn').addEventListener('click', saveCalculation);
+        el('shareBtn').addEventListener('click', shareResults);
+        el('resetBtn').addEventListener('click', resetAll);
+        el('exportBtn').addEventListener('click', exportToCSV);
+        el('clearHistoryBtn').addEventListener('click', () => {
+            if (confirm('Vider l\'historique ?')) {
+                history = [];
+                localStorage.removeItem('poopHistory');
+                updateHistory();
+            }
+        });
+
+        // Initialize
+        function init() {
+            body.dataset.theme = theme;
+            themeIcon.textContent = theme === 'dark' ? '🌙' : '☀️';
+            themeText.textContent = theme === 'dark' ? 'Mode sombre' : 'Mode clair';
+
+            loadDefaults();
+            updateStats();
+            updateHistory();
+
+            // Auto-save every calculation
+            [tj, activeH, poopMin, oneWaySec].forEach(input => {
+                input.addEventListener('change', () => {
+                    if (input.value && compute().cost > 0) saveCalculation();
+                });
+            });
+        }
+
+        init();
+
+        // Make functions available globally for onclick handlers
+        window.loadFromHistory = loadFromHistory;
+    })();
 </script>
 </body>
 </html>
