@@ -3,1074 +3,1450 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Poop Price Calculator 💩</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💩</text></svg>">
+    <title>La Gazette du Trône — Observatoire du Préjudice Défécatoire</title>
+    <meta name="description" content="Bulletin officiel, éphémère et chiffré du préjudice économique occasionné par les pauses-sanitaires en milieu professionnel." />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.92em%22 font-size=%2290%22>📜</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,200..900,0..100;1,9..144,200..900,0..100&family=JetBrains+Mono:wght@400;500;700&display=swap">
     <style>
-        :root{
-            --bg:#0a0f1a; --bg2:#0c1324; --card:#0f1a33; --text:#e6edf3; --muted:#9aa4b2;
-            --accent:#6ea8ff; --accent2:#22d3ee; --ring: rgba(110,168,255,.25);
-            --radius:16px; --success:#22c55e; --warning:#f59e0b; --danger:#ef4444;
-            --transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+        /* ───────────────────────── TOKENS ───────────────────────── */
+        :root {
+            --paper:        #F3E9D2;
+            --paper-warm:   #EADFBE;
+            --paper-deep:   #DFD2AC;
+            --ink:          #14161C;
+            --ink-2:        #2D2A22;
+            --ink-soft:     #5A5042;
+            --rule:         #8E7C59;
+            --rule-faint:   rgba(142,124,89,0.35);
+            --red:          #A22525;
+            --red-deep:     #781818;
+            --gold:         #9A7324;
+            --leaf:         #3E5C3A;
+
+            --serif: 'Fraunces', 'Libre Caslon Text', 'Iowan Old Style', 'Georgia', serif;
+            --mono:  'JetBrains Mono', ui-monospace, 'Courier New', monospace;
+
+            --dur: 420ms;
+            --ease: cubic-bezier(.2,.7,.2,1);
         }
-        [data-theme="light"]{
-            --bg:#f8fafc; --bg2:#f1f5f9; --card:#ffffff; --text:#1e293b; --muted:#64748b;
-            --accent:#3b82f6; --accent2:#06b6d4; --ring: rgba(59,130,246,.25);
+
+        [data-edition="evening"] {
+            --paper:        #161310;
+            --paper-warm:   #1E1A15;
+            --paper-deep:   #241F17;
+            --ink:          #EADEC1;
+            --ink-2:        #D4C49E;
+            --ink-soft:     #8F8265;
+            --rule:         #655738;
+            --rule-faint:   rgba(101,87,56,0.45);
+            --red:          #DE5656;
+            --red-deep:     #B03A3A;
+            --gold:         #D7AC4A;
+            --leaf:         #8CA77E;
         }
-        *{box-sizing:border-box; transition:var(--transition)}
-        html,body{height:100%}
-        body{
-            margin:0; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-            color:var(--text); overflow-x:hidden;
+
+        /* ───────────────────────── RESET ───────────────────────── */
+        *,*::before,*::after { box-sizing: border-box; }
+        html,body { height: 100%; }
+        body {
+            margin: 0;
+            font-family: var(--serif);
+            font-variation-settings: "opsz" 14, "SOFT" 30;
+            font-size: 17px;
+            line-height: 1.55;
+            color: var(--ink);
+            background: var(--paper);
+            -webkit-font-smoothing: antialiased;
+            transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+            overflow-x: hidden;
+        }
+
+        /* Paper grain — subtle noise overlay */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: -10%;
+            pointer-events: none;
+            z-index: 1;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+            opacity: .10;
+            mix-blend-mode: multiply;
+        }
+        [data-edition="evening"] body::before { mix-blend-mode: screen; opacity: .05; }
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.14) 100%);
+        }
+        [data-edition="evening"] body::after {
+            background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.45) 100%);
+        }
+
+        ::selection { background: var(--red); color: var(--paper); }
+
+        /* ───────────────────────── CLASSIFIED STAMP ───────────────────────── */
+        .stamp {
+            position: fixed;
+            top: 72px;
+            right: -18px;
+            z-index: 8;
+            padding: 10px 48px 8px;
+            color: var(--red);
+            border: 3px double var(--red);
+            font-family: var(--serif);
+            font-variation-settings: "opsz" 14, "wght" 800, "SOFT" 0;
+            font-size: 13px;
+            letter-spacing: .32em;
+            text-transform: uppercase;
+            transform: rotate(8deg);
+            opacity: .42;
+            box-shadow: inset 0 0 0 1px var(--paper);
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .stamp::before {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            background-image:
+              radial-gradient(circle at 30% 20%, rgba(162,37,37,.15) 2px, transparent 3px),
+              radial-gradient(circle at 70% 65%, rgba(162,37,37,.12) 1px, transparent 2px),
+              radial-gradient(circle at 50% 90%, rgba(162,37,37,.18) 2px, transparent 3px);
+            mix-blend-mode: multiply;
+            pointer-events: none;
+        }
+
+        /* ───────────────────────── LAYOUT ───────────────────────── */
+        .paper {
+            position: relative;
+            z-index: 2;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 56px clamp(20px, 4vw, 72px) 80px;
+        }
+
+        /* ───────────────────────── MASTHEAD ───────────────────────── */
+        .masthead-rule {
+            height: 6px;
+            border-top: 2px solid var(--ink);
+            border-bottom: 1px solid var(--ink);
+        }
+        .masthead-top {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 24px;
+            align-items: center;
+            padding: 10px 4px;
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+        }
+        .masthead-top .center { text-align: center; }
+        .masthead-top .right { text-align: right; }
+        .masthead-top strong { color: var(--ink); font-weight: 500; }
+
+        .title {
+            margin: 0;
+            text-align: center;
+            font-variation-settings: "opsz" 144, "wght" 900, "SOFT" 0;
+            font-size: clamp(56px, 11vw, 180px);
+            line-height: .82;
+            letter-spacing: -.035em;
+            font-feature-settings: "lnum","dlig";
+            color: var(--ink);
+            padding: 14px 0 6px;
+            cursor: pointer;
+        }
+        .title-flourish {
+            display: block;
+            text-align: center;
+            font-size: 24px;
+            color: var(--rule);
+            margin: 4px 0 2px;
+            letter-spacing: 1em;
+            padding-left: 1em;
+        }
+        .title-flourish.small { font-size: 14px; margin: 10px 0; }
+
+        .motto {
+            text-align: center;
+            font-style: italic;
+            font-variation-settings: "opsz" 14, "wght" 400, "SOFT" 100;
+            color: var(--ink-soft);
+            font-size: 15px;
+            letter-spacing: .02em;
+        }
+        .subtitle {
+            text-align: center;
+            font-family: var(--mono);
+            font-size: 10px;
+            letter-spacing: .38em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+            margin-top: 4px;
+        }
+
+        /* ───────────────────────── EDITION BAR ───────────────────────── */
+        .edition-bar {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 24px;
+            align-items: center;
+            margin-top: 14px;
+            padding: 10px 0;
+            border-top: 1px solid var(--ink);
+            border-bottom: 3px double var(--ink);
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+        }
+        .edition-tag { color: var(--ink); font-weight: 500; }
+        .edition-tag::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--red);
+            margin-right: 10px;
+            vertical-align: 1px;
+            box-shadow: 0 0 0 2px var(--paper), 0 0 0 3px var(--red);
+            animation: pulse-dot 2.2s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%,100% { opacity: 1; }
+            50%     { opacity: .35; }
+        }
+
+        .ticker-wrap {
+            overflow: hidden;
+            mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+        }
+        .ticker {
+            display: inline-block;
+            white-space: nowrap;
+            padding-left: 100%;
+            animation: tick 48s linear infinite;
+        }
+        .ticker span { margin: 0 28px; }
+        .ticker b { font-weight: 500; color: var(--ink); }
+        .ticker b.up   { color: var(--leaf); }
+        .ticker b.down { color: var(--red); }
+        @keyframes tick { to { transform: translateX(-100%); } }
+
+        .edition-btn {
+            appearance: none;
+            background: transparent;
+            border: 1px solid var(--ink);
+            color: var(--ink);
+            padding: 6px 14px;
+            font-family: var(--mono);
+            font-size: 10px;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 180ms var(--ease);
+        }
+        .edition-btn:hover {
+            background: var(--ink);
+            color: var(--paper);
+        }
+
+        /* ───────────────────────── ISSUE GRID ───────────────────────── */
+        .issue {
+            display: grid;
+            grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+            gap: clamp(28px, 4vw, 64px);
+            margin-top: 42px;
+        }
+        @media (max-width: 960px) {
+            .issue { grid-template-columns: 1fr; gap: 56px; }
+        }
+
+        .column-rule {
+            border-left: 1px solid var(--rule-faint);
+            padding-left: clamp(28px, 4vw, 56px);
+        }
+        @media (max-width: 960px) {
+            .column-rule { border-left: 0; padding-left: 0; border-top: 1px solid var(--rule-faint); padding-top: 40px; }
+        }
+
+        .section-num {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: .35em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+        .headline {
+            font-variation-settings: "opsz" 144, "wght" 800, "SOFT" 0;
+            font-size: clamp(34px, 4.2vw, 56px);
+            line-height: 1.02;
+            letter-spacing: -.02em;
+            margin: 0 0 18px;
+            color: var(--ink);
+        }
+        .headline em {
+            font-style: italic;
+            color: var(--red);
+            font-variation-settings: "opsz" 144, "wght" 800, "SOFT" 100;
+        }
+
+        .standfirst {
+            font-variation-settings: "opsz" 14, "wght" 420, "SOFT" 50;
+            font-size: 18px;
+            color: var(--ink-2);
+            padding-bottom: 18px;
+            margin: 0 0 22px;
+            border-bottom: 1px solid var(--rule-faint);
+            font-style: italic;
+            max-width: 62ch;
+        }
+
+        /* ───────────── DECLARATION PARAGRAPH (inline inputs) ───────────── */
+        .declaration {
+            font-variation-settings: "opsz" 18, "wght" 400, "SOFT" 40;
+            font-size: clamp(18px, 1.4vw, 21px);
+            line-height: 1.75;
+            margin: 0 0 28px;
+            text-align: justify;
+            hyphens: auto;
+            color: var(--ink);
+        }
+
+        .dropcap {
+            float: left;
+            font-variation-settings: "opsz" 144, "wght" 900, "SOFT" 0;
+            font-size: 5.2em;
+            line-height: .82;
+            padding: 8px 14px 0 0;
+            margin-top: 6px;
+            color: var(--red);
+            font-feature-settings: "lnum";
+        }
+
+        .field {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 3px;
+            padding: 0 4px 0 6px;
+            margin: 0 2px;
+            background: linear-gradient(180deg, transparent 0 calc(100% - 2px), var(--ink) calc(100% - 2px) 100%);
+            transition: background 180ms var(--ease);
+            cursor: text;
+        }
+        .field:focus-within {
+            background: linear-gradient(180deg, transparent 0 calc(100% - 2px), var(--red) calc(100% - 2px) 100%);
+        }
+        .field input {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+            background: transparent;
+            border: 0;
+            outline: 0;
+            color: inherit;
+            font-family: var(--mono);
+            font-size: .92em;
+            font-weight: 500;
+            padding: 0;
+            text-align: right;
+            width: 3.5ch;
+            min-width: 3ch;
+            transition: color 180ms var(--ease);
+        }
+        .field input::-webkit-outer-spin-button,
+        .field input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .field input:focus { color: var(--red); }
+        .field .unit {
+            font-family: var(--serif);
+            font-style: italic;
+            font-size: .88em;
+            color: var(--ink-soft);
+        }
+
+        /* ───────────── VERDICT FIGURE ───────────── */
+        .verdict {
+            margin: 36px 0 8px;
+            padding: 36px 28px 30px;
+            background: var(--paper-warm);
+            border-top: 3px double var(--ink);
+            border-bottom: 3px double var(--ink);
+            position: relative;
+            text-align: center;
+            overflow: hidden;
+        }
+        .verdict::before,
+        .verdict::after {
+            content: "❦";
+            position: absolute;
+            top: 6px;
+            color: var(--rule);
+            font-size: 20px;
+        }
+        .verdict::before { left: 12px; }
+        .verdict::after  { right: 12px; }
+
+        .verdict-label {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: .38em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+            margin-bottom: 18px;
+        }
+        .verdict-value {
+            font-variation-settings: "opsz" 144, "wght" 900, "SOFT" 0;
+            font-size: clamp(64px, 11vw, 148px);
+            font-style: italic;
+            line-height: .92;
+            color: var(--red);
+            font-feature-settings: "tnum","lnum";
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -.04em;
+            transition: color 220ms var(--ease);
+            white-space: nowrap;
+        }
+        .verdict-value.tone-low    { color: var(--leaf); }
+        .verdict-value.tone-mid    { color: var(--gold); }
+        .verdict-value.tone-high   { color: var(--red); }
+        .verdict-value.tone-crisis { color: var(--red-deep); text-shadow: 0 0 2px rgba(162,37,37,.3); }
+
+        .verdict-kicker {
+            margin-top: 16px;
+            font-style: italic;
+            font-variation-settings: "opsz" 14, "wght" 400, "SOFT" 100;
+            color: var(--ink-soft);
+            font-size: 15px;
+            letter-spacing: .02em;
+        }
+        .verdict-kicker strong {
+            font-style: normal;
+            font-weight: 700;
+            color: var(--ink);
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: .22em;
+            margin-right: 8px;
+            padding-right: 10px;
+            border-right: 1px solid var(--rule);
+        }
+
+        .figcaption {
+            font-family: var(--mono);
+            font-size: 10px;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+            margin: 14px 0 0;
+            text-align: center;
+        }
+        .figcaption em {
+            font-style: italic;
+            text-transform: none;
+            letter-spacing: .05em;
+        }
+
+        /* ───────────── ASIDE / INDICATORS ───────────── */
+        .aside-title {
+            font-variation-settings: "opsz" 60, "wght" 700, "SOFT" 0;
+            font-size: 26px;
+            line-height: 1;
+            margin: 0 0 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--ink);
+        }
+
+        .indicators dl {
+            margin: 0;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            column-gap: 14px;
+            row-gap: 0;
+            font-size: 16px;
+        }
+        .indicators dt {
+            padding: 13px 0;
+            border-bottom: 1px dotted var(--rule);
+            color: var(--ink-2);
+            font-variation-settings: "opsz" 14, "wght" 420, "SOFT" 30;
+            font-style: italic;
+        }
+        .indicators dt .foot {
+            font-family: var(--mono);
+            font-style: normal;
+            font-size: 11px;
+            color: var(--red);
+            margin-left: 4px;
+            vertical-align: super;
+        }
+        .indicators dd {
+            margin: 0;
+            padding: 13px 0;
+            border-bottom: 1px dotted var(--rule);
+            font-family: var(--mono);
+            font-variant-numeric: tabular-nums;
+            font-weight: 500;
+            text-align: right;
+            color: var(--ink);
+        }
+        .indicators dd.highlight { color: var(--red); }
+
+        .footnotes {
+            margin: 18px 0 0;
+            font-family: var(--mono);
+            font-size: 10px;
+            line-height: 1.6;
+            letter-spacing: .05em;
+            color: var(--ink-soft);
+        }
+        .footnotes span + span { margin-left: 8px; }
+        .footnotes b { color: var(--red); font-weight: 400; margin-right: 4px; }
+
+        /* ───────────── CHRONOGRAPH ───────────── */
+        .chronograph {
+            margin-top: 44px;
+            padding: 26px 0 0;
+            border-top: 3px double var(--ink);
+        }
+        .chrono-body {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 22px;
+            align-items: center;
+        }
+        @media (max-width: 560px) {
+            .chrono-body { grid-template-columns: 1fr; }
+        }
+        .chrono-dial {
+            width: 148px;
+            height: 148px;
+            border-radius: 50%;
+            border: 1px solid var(--ink);
+            position: relative;
             background:
-                    radial-gradient(1000px 700px at 10% -10%, #142955 0%, transparent 55%),
-                    radial-gradient(900px 600px at 100% 0%, #0b2e38 0%, transparent 60%),
-                    linear-gradient(180deg,var(--bg),var(--bg2));
-            display:flex; align-items:flex-start; justify-content:center; padding:24px; gap:24px;
-            min-height:100vh;
+                radial-gradient(circle at center, var(--paper) 0 38%, transparent 38%),
+                conic-gradient(from 0deg, var(--ink) 0 2%, transparent 2% 100%);
+            display: grid;
+            place-items: center;
         }
-        [data-theme="light"] body{
-            background:
-                    radial-gradient(1000px 700px at 10% -10%, #dbeafe 0%, transparent 55%),
-                    radial-gradient(900px 600px at 100% 0%, #f0f9ff 0%, transparent 60%),
-                    linear-gradient(180deg,var(--bg),var(--bg2));
+        .chrono-dial::before {
+            content: "";
+            position: absolute;
+            inset: 6px;
+            border-radius: 50%;
+            border: 1px dotted var(--rule);
         }
-        .main-wrap{width:100%; max-width:560px}
-        .side-wrap{width:100%; max-width:400px; position:sticky; top:24px}
-        @media (max-width:1200px){
-            body{flex-direction:column; align-items:center}
-            .side-wrap{position:relative; top:0}
+        .chrono-dial .numeral {
+            position: absolute;
+            font-variation-settings: "opsz" 9, "wght" 500, "SOFT" 0;
+            font-size: 10px;
+            color: var(--ink-soft);
+            font-feature-settings: "lnum";
         }
-        .header-controls{display:flex; justify-content:space-between; align-items:center; margin-bottom:24px}
-        .theme-toggle{
-            background:var(--card); border:1px solid rgba(255,255,255,.06); border-radius:12px;
-            padding:8px 12px; cursor:pointer; display:flex; align-items:center; gap:8px;
-            font-size:.9rem; color:var(--muted);
+        .chrono-dial .n12 { top: 8px; left: 50%; transform: translateX(-50%); }
+        .chrono-dial .n3  { right: 8px; top: 50%; transform: translateY(-50%); }
+        .chrono-dial .n6  { bottom: 8px; left: 50%; transform: translateX(-50%); }
+        .chrono-dial .n9  { left: 8px; top: 50%; transform: translateY(-50%); }
+
+        .chrono-hand {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 2px;
+            height: 56px;
+            background: var(--red);
+            transform-origin: 50% 100%;
+            transform: translate(-50%, -100%) rotate(0deg);
+            transition: transform 300ms var(--ease);
+            border-radius: 2px;
         }
-        .theme-toggle:hover{background:rgba(255,255,255,.05)}
-        h1{
-            margin:0; text-align:center; font-size:clamp(22px,4vw,34px); font-weight:900;
-            background:linear-gradient(90deg,var(--accent),var(--accent2));
-            -webkit-background-clip:text; background-clip:text; color:transparent;
-            text-shadow:0 0 30px rgba(110,168,255,.25); cursor:pointer;
+        .chrono-pin {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 10px;
+            height: 10px;
+            background: var(--ink);
+            border: 2px solid var(--paper);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
         }
-        .subtitle{margin:0 0 16px; text-align:center; color:var(--muted); font-size:.95rem}
-        .card{
-            background:rgba(15,26,51,.7); border:1px solid rgba(255,255,255,.06);
-            border-radius:var(--radius); box-shadow:0 12px 40px rgba(0,0,0,.45);
-            backdrop-filter: blur(6px); padding:18px; margin-bottom:20px;
+
+        .chrono-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
-        [data-theme="light"] .card{
-            background:var(--card); border:1px solid #e2e8f0;
-            box-shadow:0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1);
+        .chrono-display {
+            font-family: var(--mono);
+            font-variant-numeric: tabular-nums;
+            font-size: clamp(36px, 5vw, 52px);
+            font-weight: 500;
+            line-height: 1;
+            letter-spacing: -.02em;
+            cursor: pointer;
+            user-select: none;
         }
-        .grid{display:grid; gap:12px}
-        @media (min-width:640px){ .grid{grid-template-columns:1fr 1fr} }
-        label{font-size:.9rem; color:var(--muted); display:block; margin-bottom:6px}
-        input, select{
-            width:100%; border-radius:12px; padding:.75rem .9rem; background:#0b152a;
-            color:var(--text); border:1px solid rgba(148,163,184,.25); outline:none;
-            font-size:.95rem;
+        .chrono-status {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
         }
-        [data-theme="light"] input, [data-theme="light"] select{
-            background:#f8fafc; border:1px solid #cbd5e1;
+        .chrono-status.is-running { color: var(--red); }
+        .chrono-status.is-running::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--red);
+            margin-right: 8px;
+            vertical-align: 1px;
+            animation: pulse-dot 1s ease-in-out infinite;
         }
-        input:focus, select:focus{border-color:var(--accent); box-shadow:0 0 0 4px var(--ring)}
-        .input-group{position:relative}
-        .input-suffix{position:absolute; right:12px; top:50%; transform:translateY(-50%);
-                      color:var(--muted); font-size:.85rem; pointer-events:none}
-        .extra-grid{display:grid; gap:12px}
-        .extra-grid--split{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-        .range-row{display:flex; align-items:center; gap:12px; padding:.7rem .9rem; border-radius:12px;
-                   background:#0b152a; border:1px solid rgba(148,163,184,.25)}
-        [data-theme="light"] .range-row{background:#f8fafc; border:1px solid #cbd5e1}
-        .range-row input[type=range]{flex:1; accent-color:var(--accent); cursor:pointer}
-        .range-value{min-width:48px; font-weight:600; color:var(--accent); text-align:right;
-                     font-variant-numeric:tabular-nums}
-        #modeExtras:empty{display:none}
-        .full{grid-column:1/-1}
-        .result{
-            margin-top:14px; padding:18px; border-radius:12px; background:#0b152a;
-            border:1px solid rgba(148,163,184,.2); text-align:center; position:relative;
-            overflow:hidden;
+        .chrono-controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
         }
-        [data-theme="light"] .result{background:#f8fafc; border:1px solid #cbd5e1}
-        #result[data-tone="success"]{border-color:rgba(34,197,94,.45); box-shadow:0 12px 30px rgba(34,197,94,.12)}
-        #result[data-tone="warning"]{border-color:rgba(245,158,11,.45); box-shadow:0 12px 30px rgba(245,158,11,.12)}
-        #result[data-tone="danger"]{border-color:rgba(239,68,68,.45); box-shadow:0 12px 30px rgba(239,68,68,.15)}
-        .price{font-size:clamp(26px,5vw,40px); font-weight:900; position:relative; z-index:2}
-        .price-animation{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(0);
-                        font-size:2rem; opacity:0; z-index:1; pointer-events:none}
-        .price-animation.animate{animation:priceBoost 0.6s ease-out}
-        @keyframes priceBoost{
-            0%{transform:translate(-50%,-50%) scale(0); opacity:1}
-            50%{transform:translate(-50%,-50%) scale(1.2); opacity:0.8}
-            100%{transform:translate(-50%,-50%) scale(2); opacity:0}
+
+        /* ───────────── LEDGER ───────────── */
+        .ledger {
+            margin-top: 44px;
+            padding: 26px 0 0;
+            border-top: 3px double var(--ink);
         }
-        .tag{display:inline-flex; gap:8px; align-items:center; padding:.4rem .7rem; border-radius:999px;
-            background:#0e1a30; border:1px solid rgba(148,163,184,.25); color:var(--muted); font-size:.85rem;
-            margin:4px 2px}
-        [data-theme="light"] .tag{background:#f1f5f9; border:1px solid #cbd5e1}
-        .footer{margin-top:8px; text-align:center; color:var(--muted); font-size:.8rem}
-        .stats-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px}
-        .stat-card{padding:12px; border-radius:12px; background:#0b152a; border:1px solid rgba(148,163,184,.1);
-                   text-align:center}
-        [data-theme="light"] .stat-card{background:#f8fafc; border:1px solid #e2e8f0}
-        .stat-value{font-size:1.5rem; font-weight:700; color:var(--accent)}
-        .stat-label{font-size:.75rem; color:var(--muted); margin-top:4px}
-        .history-list{max-height:300px; overflow-y:auto}
-        .history-item{padding:12px; border-radius:8px; background:#0b152a; margin-bottom:8px;
-                      border:1px solid rgba(148,163,184,.1); cursor:pointer}
-        [data-theme="light"] .history-item{background:#f8fafc; border:1px solid #e2e8f0}
-        .history-item:hover{background:rgba(255,255,255,.02)}
-        [data-theme="light"] .history-item:hover{background:#f1f5f9}
-        .history-price{font-weight:600; color:var(--accent)}
-        .history-details{font-size:.8rem; color:var(--muted); margin-top:4px}
-        .btn{padding:8px 16px; border-radius:8px; border:none; cursor:pointer; font-size:.9rem;
-             display:inline-flex; align-items:center; gap:8px; text-decoration:none}
-        .btn-primary{background:var(--accent); color:white}
-        .btn-secondary{background:var(--card); color:var(--text); border:1px solid rgba(255,255,255,.1)}
-        [data-theme="light"] .btn-secondary{border:1px solid #e2e8f0}
-        .btn:disabled{opacity:.45; cursor:not-allowed; transform:none}
-        .btn:focus-visible{outline:2px solid var(--accent2); outline-offset:2px}
-        .btn:not(:disabled):hover{opacity:.9; transform:translateY(-1px)}
-        .btn-group{display:flex; gap:8px; flex-wrap:wrap; justify-content:center}
-        .mode-selector{display:flex; background:#0b152a; border-radius:12px; padding:4px; margin-bottom:16px}
-        [data-theme="light"] .mode-selector{background:#f1f5f9; border:1px solid #e2e8f0}
-        .mode-btn{flex:1; padding:8px 12px; border-radius:8px; border:none; background:transparent;
-                  color:var(--muted); cursor:pointer; font-size:.85rem}
-        .mode-btn.active{background:var(--accent); color:white}
-        .easter-egg{position:fixed; pointer-events:none; z-index:1000; font-size:2rem}
-        .shake{animation:shake 0.5s ease-in-out}
-        @keyframes shake{
-            0%,100%{transform:translateX(0)}
-            25%{transform:translateX(-5px)}
-            75%{transform:translateX(5px)}
+        .ledger-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--mono);
+            font-variant-numeric: tabular-nums;
+            font-size: 13px;
         }
-        .pulse{animation:pulse 2s infinite}
-        @keyframes pulse{
-            0%,100%{opacity:1}
-            50%{opacity:.5}
+        .ledger-table thead th {
+            text-align: left;
+            padding: 8px 10px;
+            font-size: 10px;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+            font-weight: 500;
+            border-bottom: 2px solid var(--ink);
+            background: var(--paper-warm);
         }
-        .timer-card h3{margin:0 0 12px; display:flex; align-items:center; gap:8px; font-size:1.05rem}
-        .timer-display{font-size:2.4rem; font-weight:700; text-align:center; letter-spacing:1px; margin-bottom:12px}
-        .timer-meta{display:flex; justify-content:space-between; gap:12px; margin-bottom:12px; font-size:.82rem; color:var(--muted)}
-        .timer-meta span{display:flex; align-items:center; gap:6px}
-        .timer-controls{justify-content:center}
-        .timer-controls .btn{min-width:110px}
-        .timer-running{color:var(--accent2)}
-        .info-note{margin-top:12px; font-size:.8rem; color:var(--muted); text-align:center}
-        .insights-list{display:flex; flex-direction:column; gap:10px; font-variant-numeric:tabular-nums}
-        .insight-item{display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:12px; background:rgba(148,163,184,.12)}
-        [data-theme="light"] .insight-item{background:#e2e8f0}
-        .insight-label{font-size:.85rem; color:var(--muted)}
-        .insight-value{font-weight:600}
-        .sparkline{width:100%; height:80px; margin-top:16px}
-        .sparkline rect{fill:rgba(148,163,184,.1)}
-        [data-theme="light"] .sparkline rect{fill:#e2e8f0}
-        .sparkline path{fill:none; stroke:var(--accent2); stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
-        .toast-container{position:fixed; bottom:24px; right:24px; display:flex; flex-direction:column; gap:10px; z-index:2000; pointer-events:none}
-        .toast{background:var(--card); color:var(--text); border:1px solid rgba(148,163,184,.2); padding:12px 16px; border-radius:12px;
-               box-shadow:0 12px 30px rgba(0,0,0,.35); opacity:.95; transform:translateY(0); transition:opacity .3s ease, transform .3s ease;
-               pointer-events:auto}
-        [data-theme="light"] .toast{background:#ffffff; border:1px solid #cbd5e1}
-        .toast.hide{opacity:0; transform:translateY(12px)}
-        .achievements{display:grid; gap:10px}
-        .achievement{padding:10px 12px; border-radius:12px; background:rgba(148,163,184,.12); display:flex; justify-content:space-between; align-items:center}
-        [data-theme="light"] .achievement{background:#e2e8f0}
-        .achievement.locked{opacity:.55}
-        .achievement span{display:flex; gap:6px; align-items:center}
-        @media (max-width:640px){
-            body{padding:16px}
-            .header-controls{flex-direction:column; gap:12px}
+        .ledger-table thead th:last-child { text-align: right; }
+        .ledger-table tbody td {
+            padding: 10px;
+            border-bottom: 1px dotted var(--rule);
+            color: var(--ink);
+        }
+        .ledger-table tbody td:last-child { text-align: right; color: var(--red); font-weight: 500; }
+        .ledger-table tbody tr { cursor: pointer; transition: background 160ms var(--ease); }
+        .ledger-table tbody tr:hover { background: var(--paper-warm); }
+        .ledger-table tbody td.empty {
+            text-align: center;
+            font-family: var(--serif);
+            font-style: italic;
+            color: var(--ink-soft);
+            padding: 28px 10px;
+            border-bottom: 0;
+        }
+        .ledger-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        /* ───────────── BUTTONS ───────────── */
+        .btn {
+            appearance: none;
+            background: transparent;
+            border: 1px solid var(--ink);
+            color: var(--ink);
+            padding: 8px 16px;
+            font-family: var(--mono);
+            font-size: 10.5px;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 180ms var(--ease);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+        .btn:hover:not(:disabled) {
+            background: var(--ink);
+            color: var(--paper);
+        }
+        .btn:disabled { opacity: .35; cursor: not-allowed; }
+        .btn:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+        .btn--primary {
+            background: var(--ink);
+            color: var(--paper);
+            border-color: var(--ink);
+        }
+        .btn--primary:hover:not(:disabled) {
+            background: var(--red);
+            border-color: var(--red);
+        }
+        .btn--ghost { border-style: dashed; }
+
+        /* ───────────── COLOPHON ───────────── */
+        .colophon {
+            margin-top: 72px;
+            padding-top: 28px;
+            border-top: 3px double var(--ink);
+            text-align: center;
+        }
+        .colophon .fleurons {
+            color: var(--rule);
+            letter-spacing: .6em;
+            padding-left: .6em;
+            margin-bottom: 14px;
+            font-size: 14px;
+        }
+        .colophon p {
+            max-width: 62ch;
+            margin: 0 auto 14px;
+            font-size: 13px;
+            color: var(--ink-soft);
+            font-style: italic;
+            font-variation-settings: "opsz" 14, "wght" 400, "SOFT" 80;
+            line-height: 1.65;
+        }
+        .colophon .mono {
+            font-family: var(--mono);
+            font-style: normal;
+            font-size: 10px;
+            letter-spacing: .25em;
+            text-transform: uppercase;
+            color: var(--ink);
+            margin-top: 8px;
+        }
+
+        /* ───────────── TOAST ───────────── */
+        .toasts {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            z-index: 50;
+            pointer-events: none;
+        }
+        .toast {
+            padding: 12px 20px;
+            background: var(--ink);
+            color: var(--paper);
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            box-shadow: 0 12px 30px rgba(0,0,0,.25);
+            animation: toast-in .3s var(--ease), toast-out .3s var(--ease) 3.2s both;
+        }
+        @keyframes toast-in { from { opacity: 0; transform: translateY(12px); } }
+        @keyframes toast-out { to   { opacity: 0; transform: translateY(12px); } }
+
+        /* ───────────── ANIMATIONS ───────────── */
+        .fade-up { opacity: 0; transform: translateY(16px); animation: fadeUp .9s var(--ease) both; }
+        .fade-up.d1 { animation-delay: .10s; }
+        .fade-up.d2 { animation-delay: .25s; }
+        .fade-up.d3 { animation-delay: .40s; }
+        .fade-up.d4 { animation-delay: .55s; }
+        .fade-up.d5 { animation-delay: .70s; }
+        @keyframes fadeUp { to { opacity: 1; transform: none; } }
+
+        /* ───────────── RESPONSIVE ───────────── */
+        @media (max-width: 640px) {
+            body { font-size: 16px; }
+            .paper { padding: 28px 18px 48px; }
+            .masthead-top { grid-template-columns: 1fr; text-align: center; gap: 6px; }
+            .masthead-top .right,
+            .masthead-top .left { text-align: center; }
+            .edition-bar { grid-template-columns: 1fr; gap: 10px; text-align: center; }
+            .stamp { top: 12px; right: -22px; font-size: 10px; padding: 6px 36px; }
+            .verdict { padding: 24px 14px 20px; }
+            .declaration { text-align: left; }
+            .dropcap { font-size: 4em; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .001ms !important;
+            }
+            .ticker { animation: none; padding-left: 0; }
+        }
+
+        .visually-hidden {
+            position: absolute !important;
+            width: 1px; height: 1px;
+            padding: 0; margin: -1px;
+            overflow: hidden; clip: rect(0,0,0,0);
+            white-space: nowrap; border: 0;
         }
     </style>
 </head>
-<body data-theme="dark">
-<div class="main-wrap">
-    <div class="header-controls">
-        <h1 id="title">Poop Price Calculator</h1>
-        <button class="theme-toggle" id="themeToggle">
-            <span id="themeIcon">🌙</span>
-            <span id="themeText">Mode sombre</span>
-        </button>
-    </div>
-    <p class="subtitle">💩 + 🚽 → prix instantané (trajet aller&nbsp;+&nbsp;retour inclus)</p>
+<body data-edition="morning">
 
-    <div class="card">
-        <div class="mode-selector">
-            <button class="mode-btn active" data-mode="basic">💰 Basic</button>
-            <button class="mode-btn" data-mode="advanced">📊 Avancé</button>
-            <button class="mode-btn" data-mode="enterprise">🏢 Enterprise</button>
+<div class="stamp" aria-hidden="true">Document · Confidentiel · § 42</div>
+
+<article class="paper">
+    <header class="masthead fade-up">
+        <div class="masthead-rule"></div>
+        <div class="masthead-top">
+            <div class="left">Vol. <strong>XLII</strong> · N° <strong>MMXXVI</strong></div>
+            <div class="center">Publication quotidienne · Prix unitaire : <strong>0,02 €</strong></div>
+            <div class="right" id="editionDate">—</div>
         </div>
+        <div class="masthead-rule"></div>
 
-        <div class="grid" id="inputGrid">
-            <div>
-                <label for="tj">Taux journalier (€/jour)</label>
-                <div class="input-group">
-                    <input id="tj" type="number" min="0" step="1" inputmode="numeric" />
-                    <span class="input-suffix">€</span>
+        <h1 class="title" id="title">La Gazette du Trône</h1>
+        <div class="title-flourish">❦ ❦ ❦</div>
+        <div class="motto">« <em>Tempus stercoris pecunia est</em> »</div>
+        <div class="subtitle">Observatoire National du Préjudice Défécatoire · Fondé en MCMLXVII</div>
+        <div class="title-flourish small">· · ·</div>
+
+        <nav class="edition-bar" aria-label="Édition">
+            <span class="edition-tag" id="editionTag">Édition du matin</span>
+            <div class="ticker-wrap" aria-hidden="true">
+                <div class="ticker" id="ticker"></div>
+            </div>
+            <button class="edition-btn" id="editionToggle" type="button">Passer à l'édition du soir</button>
+        </nav>
+    </header>
+
+    <main class="issue">
+        <section class="lead fade-up d2" aria-labelledby="leadHead">
+            <div class="section-num">§ I · Bulletin principal</div>
+            <h2 class="headline" id="leadHead">Du <em>préjudice</em> occasionné par l'évacuation gastro-intestinale en horaires ouvrés</h2>
+            <p class="standfirst">Communiqué officiel, recalculé instantanément à chaque variation des paramètres déclarés. L'Observatoire ne saurait être tenu responsable des décisions impulsives prises à la lecture de ce chiffre.</p>
+
+            <p class="declaration">
+                <span class="dropcap">C</span>onsidérant un taux journalier arrêté à
+                <span class="field"><input id="tj" type="number" min="0" step="1" inputmode="numeric" aria-label="Taux journalier en euros"><span class="unit">€</span></span>,
+                une journée ouvrée facturable de
+                <span class="field"><input id="activeH" type="number" min="0.25" step="0.25" inputmode="decimal" aria-label="Heures facturables"><span class="unit">h</span></span>,
+                une durée moyenne d'évacuation de
+                <span class="field"><input id="poopMin" type="number" min="0" step="0.5" inputmode="decimal" aria-label="Durée de la séance en minutes"><span class="unit">min</span></span>,
+                un trajet aller-simple vers le cabinet estimé à
+                <span class="field"><input id="oneWaySec" type="number" min="0" step="1" inputmode="numeric" aria-label="Trajet aller en secondes"><span class="unit">s</span></span>,
+                et une fréquence quotidienne d'occurrences de
+                <span class="field"><input id="frequency" type="number" min="0" step="0.5" inputmode="decimal" aria-label="Fréquence quotidienne"><span class="unit">/j</span></span> ;
+                l'Observatoire arrête, par la présente, le préjudice par séance à la somme de :
+            </p>
+
+            <figure class="verdict" id="verdict">
+                <div class="verdict-label">Préjudice unitaire · aller &amp; retour inclus</div>
+                <div class="verdict-value" id="price">—&nbsp;€</div>
+                <div class="verdict-kicker" id="kicker"><strong>Classement</strong> en attente de données suffisantes</div>
+            </figure>
+            <p class="figcaption">Figure I · Calcul établi selon la formule <em>TJ ÷ (H × 60) × [m<sub>💩</sub> + 2 s<sub>🚶</sub> ÷ 60]</em></p>
+        </section>
+
+        <aside class="column-rule">
+
+            <section class="indicators fade-up d3" aria-labelledby="asideHead">
+                <div class="section-num">§ II · Indicateurs dérivés</div>
+                <h3 class="aside-title" id="asideHead">Indicateurs macro-intestinaux</h3>
+                <dl>
+                    <dt>Préjudice journalier</dt>
+                    <dd id="idxDaily" class="highlight">—</dd>
+
+                    <dt>Extrapolation mensuelle <span class="foot">†</span></dt>
+                    <dd id="idxMonthly">—</dd>
+
+                    <dt>Extrapolation annuelle <span class="foot">‡</span></dt>
+                    <dd id="idxYearly">—</dd>
+
+                    <dt>Temps perdu / jour</dt>
+                    <dd id="idxTime">—</dd>
+
+                    <dt>Équivalent cafés <span class="foot">§</span></dt>
+                    <dd id="idxCoffees">—</dd>
+
+                    <dt>Part de la journée ouvrée</dt>
+                    <dd id="idxShare">—</dd>
+                </dl>
+                <div class="footnotes">
+                    <span><b>†</b> Base 22 jours ouvrés.</span>
+                    <span><b>‡</b> Base 220 jours / an.</span>
+                    <span><b>§</b> Expresso à 2,50 €.</span>
                 </div>
-            </div>
-            <div>
-                <label for="activeH">Temps facturable (heures)</label>
-                <div class="input-group">
-                    <input id="activeH" type="number" min="0.25" step="0.25" />
-                    <span class="input-suffix">h</span>
+            </section>
+
+            <section class="chronograph fade-up d4" aria-labelledby="chronoHead">
+                <div class="section-num">§ III · Mesure</div>
+                <h3 class="aside-title" id="chronoHead">Chronomètre officiel</h3>
+                <div class="chrono-body">
+                    <div class="chrono-dial" aria-hidden="true">
+                        <span class="numeral n12">0</span>
+                        <span class="numeral n3">15</span>
+                        <span class="numeral n6">30</span>
+                        <span class="numeral n9">45</span>
+                        <div class="chrono-hand" id="chronoHand"></div>
+                        <div class="chrono-pin"></div>
+                    </div>
+                    <div class="chrono-info">
+                        <div class="chrono-display" id="chronoDisplay" title="Double-clic pour remettre à zéro">00:00:00</div>
+                        <div class="chrono-status" id="chronoStatus">En attente de commandement</div>
+                        <div class="chrono-controls">
+                            <button class="btn btn--primary" id="chronoStart" type="button">Lancer</button>
+                            <button class="btn" id="chronoPause" type="button" disabled>Interrompre</button>
+                            <button class="btn btn--ghost" id="chronoApply" type="button" disabled>Consigner</button>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </section>
 
-            <div>
-                <label for="poopMin">Durée du 💩 (minutes)</label>
-                <div class="input-group">
-                    <input id="poopMin" type="number" min="0" step="0.5" inputmode="decimal" />
-                    <span class="input-suffix">min</span>
+            <section class="ledger fade-up d5" aria-labelledby="ledgerHead">
+                <div class="section-num">§ IV · Archives</div>
+                <h3 class="aside-title" id="ledgerHead">Journal des séances</h3>
+                <table class="ledger-table">
+                    <caption class="visually-hidden">Dix dernières séances consignées au registre.</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">N°</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Durée</th>
+                            <th scope="col">Préjudice</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ledgerBody">
+                        <tr><td class="empty" colspan="4">— Registre vierge. Aucune séance consignée —</td></tr>
+                    </tbody>
+                </table>
+                <div class="ledger-actions">
+                    <button class="btn" id="saveBtn" type="button">Consigner la séance</button>
+                    <button class="btn btn--ghost" id="exportBtn" type="button">Édition imprimée (.csv)</button>
+                    <button class="btn btn--ghost" id="clearBtn" type="button">Purger le registre</button>
                 </div>
-            </div>
-            <div>
-                <label for="oneWaySec">Trajet 🚶→🚽 (secondes, aller)</label>
-                <div class="input-group">
-                    <input id="oneWaySec" type="number" min="0" step="1" inputmode="numeric" />
-                    <span class="input-suffix">sec</span>
-                </div>
-            </div>
+            </section>
+        </aside>
+    </main>
 
-            <div>
-                <label for="frequency">Fréquence quotidienne</label>
-                <div class="input-group">
-                    <input id="frequency" type="number" min="0" step="0.5" inputmode="decimal" />
-                    <span class="input-suffix">/jour</span>
-                </div>
-            </div>
+    <footer class="colophon fade-up d5">
+        <div class="fleurons">❦ · ❦ · ❦</div>
+        <p>
+            Publié sous l'égide de l'<em>Observatoire National du Préjudice Défécatoire</em>.
+            Rédacteur en chef : <em>un algorithme jovial</em>. Maquette et typographie : <strong>Fraunces</strong> &amp; <strong>JetBrains&nbsp;Mono</strong>.
+            Imprimé sur vélin numérique, en deux éditions &mdash; matinale &amp; nocturne.
+            Tous droits de reproduction réservés à la nature humaine.
+        </p>
+        <div class="mono">§ Fin de l'édition · Repli au cabinet autorisé §</div>
+        <div class="fleurons">❦ · ❦ · ❦</div>
+    </footer>
+</article>
 
-            <div class="full" id="modeExtras" aria-live="polite"></div>
+<div class="toasts" id="toasts" aria-live="polite" aria-atomic="true"></div>
 
-            <div class="full result" id="result">
-                <div class="price-animation" id="priceAnimation">💸</div>
-                <div class="price" id="price">—</div>
-                <div>
-                    <div class="tag">Inclut le trajet aller&nbsp;+&nbsp;retour</div>
-                    <div class="tag" id="efficiencyTag">—</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="btn-group">
-            <button class="btn btn-secondary" id="saveBtn">💾 Sauvegarder</button>
-            <button class="btn btn-secondary" id="shareBtn">📤 Partager</button>
-            <button class="btn btn-secondary" id="resetBtn">🔄 Reset</button>
-        </div>
-
-        <div class="footer">Tout se met à jour au fil de la saisie. Valeurs par défaut appliquées.</div>
-    </div>
-
-    <div class="card timer-card">
-        <h3>🕒 Minuteur de session</h3>
-        <div class="timer-display" id="timerDisplay">00:00</div>
-        <div class="timer-meta">
-            <span id="timerStatus">En attente</span>
-            <span id="timerAutoFill">Remplit automatiquement la durée</span>
-        </div>
-        <div class="btn-group timer-controls">
-            <button class="btn btn-primary" id="timerStart">▶️ Lancer</button>
-            <button class="btn btn-secondary" id="timerPause">⏸️ Pause</button>
-            <button class="btn btn-secondary" id="timerApply">✅ Appliquer</button>
-        </div>
-        <div class="info-note">Le minuteur enregistre la durée du 💩 et met à jour le champ correspondant.</div>
-    </div>
-</div>
-
-<div class="side-wrap">
-    <div class="card">
-        <h3 style="margin:0 0 16px; color:var(--accent)">📈 Statistiques</h3>
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-value" id="totalCalculations">0</div>
-                <div class="stat-label">Calculs</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="avgCost">0€</div>
-                <div class="stat-label">Coût moyen</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="totalTime">0min</div>
-                <div class="stat-label">Temps total</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="dailyLoss">0€</div>
-                <div class="stat-label">Perte/jour</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <h3 style="margin:0 0 16px; color:var(--accent)">💡 Insights</h3>
-        <div class="insights-list">
-            <div class="insight-item">
-                <span class="insight-label">Impact quotidien</span>
-                <span class="insight-value" id="insightDaily">—</span>
-            </div>
-            <div class="insight-item">
-                <span class="insight-label">Impact mensuel (22j)</span>
-                <span class="insight-value" id="insightMonthly">—</span>
-            </div>
-            <div class="insight-item">
-                <span class="insight-label">Impact annuel</span>
-                <span class="insight-value" id="insightYearly">—</span>
-            </div>
-            <div class="insight-item">
-                <span class="insight-label">Temps perdu / jour</span>
-                <span class="insight-value" id="insightTime">—</span>
-            </div>
-            <div class="insight-item">
-                <span class="insight-label">Équivalent cafés</span>
-                <span class="insight-value" id="insightCoffees">—</span>
-            </div>
-        </div>
-        <svg class="sparkline" id="historySparkline" viewBox="0 0 100 40" preserveAspectRatio="none" role="img" aria-label="Historique des coûts (derniers calculs)">
-            <rect x="0" y="0" width="100" height="40" rx="12" ry="12"></rect>
-            <path id="sparklinePath" d="" opacity="0"></path>
-        </svg>
-    </div>
-
-    <div class="card">
-        <h3 style="margin:0 0 16px; color:var(--accent)">📝 Historique</h3>
-        <div class="history-list" id="historyList">
-            <div style="text-align:center; color:var(--muted); font-style:italic">Aucun calcul encore</div>
-        </div>
-        <div class="btn-group" style="margin-top:12px">
-            <button class="btn btn-secondary" id="exportBtn">📊 Exporter CSV</button>
-            <button class="btn btn-secondary" id="clearHistoryBtn">🗑️ Vider</button>
-        </div>
-    </div>
-    <div class="card">
-        <h3 style="margin:0 0 16px; color:var(--accent)">🏆 Succès</h3>
-        <div class="achievements" id="achievementsList">
-            <div class="achievement locked" data-key="first">
-                <span>🥉 Premier calcul</span>
-                <span class="achievement-status">🔒</span>
-            </div>
-            <div class="achievement locked" data-key="saver">
-                <span>🥈 Fan de stats</span>
-                <span class="achievement-status">🔒</span>
-            </div>
-            <div class="achievement locked" data-key="highroller">
-                <span>🥇 Gros poisson</span>
-                <span class="achievement-status">🔒</span>
-            </div>
-        </div>
-    </div>
-    <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 <script>
-    (() => {
-        const DEFAULTS = {
-            basic: { tj: 600, activeH: 7.5, poopMin: 6, oneWaySec: 30, frequency: 2.5 },
-            advanced: { tj: 800, activeH: 8, poopMin: 8, oneWaySec: 45, productivity: 85, urgency: 'normal', frequency: 3 },
-            enterprise: { tj: 1200, activeH: 9, poopMin: 10, oneWaySec: 60, productivity: 90, urgency: 'normal', teamSize: 5, meetingCost: 0, frequency: 4 }
+(() => {
+    'use strict';
+
+    /* ──────────────────── DEFAULTS & STATE ──────────────────── */
+    const DEFAULTS     = { tj: 600, activeH: 7.5, poopMin: 6, oneWaySec: 30, frequency: 2.5 };
+    const MONTHLY_DAYS = 22;
+    const YEARLY_DAYS  = 220;
+    const COFFEE_PRICE = 2.50;
+
+    const LS = { history: 'gazette.history', edition: 'gazette.edition' };
+
+    const readLS = (k, fb) => {
+        try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : fb; }
+        catch { return fb; }
+    };
+
+    let history = Array.isArray(readLS(LS.history, [])) ? readLS(LS.history, []) : [];
+    let edition = localStorage.getItem(LS.edition) || 'morning';
+
+    /* ──────────────────── DOM ──────────────────── */
+    const $ = sel => document.querySelector(sel);
+
+    const inputs = {
+        tj:        $('#tj'),
+        activeH:   $('#activeH'),
+        poopMin:   $('#poopMin'),
+        oneWaySec: $('#oneWaySec'),
+        frequency: $('#frequency')
+    };
+
+    const ui = {
+        title:      $('#title'),
+        date:       $('#editionDate'),
+        editionTag: $('#editionTag'),
+        editionBtn: $('#editionToggle'),
+        ticker:     $('#ticker'),
+        price:      $('#price'),
+        kicker:     $('#kicker'),
+        idx: {
+            daily:   $('#idxDaily'),
+            monthly: $('#idxMonthly'),
+            yearly:  $('#idxYearly'),
+            time:    $('#idxTime'),
+            coffees: $('#idxCoffees'),
+            share:   $('#idxShare')
+        },
+        chrono: {
+            display: $('#chronoDisplay'),
+            status:  $('#chronoStatus'),
+            hand:    $('#chronoHand'),
+            start:   $('#chronoStart'),
+            pause:   $('#chronoPause'),
+            apply:   $('#chronoApply')
+        },
+        ledgerBody: $('#ledgerBody'),
+        saveBtn:    $('#saveBtn'),
+        exportBtn:  $('#exportBtn'),
+        clearBtn:   $('#clearBtn'),
+        toasts:     $('#toasts')
+    };
+
+    /* ──────────────────── FORMATTERS ──────────────────── */
+    const fmtEUR  = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtEUR0 = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+    const fmtPct  = new Intl.NumberFormat('fr-FR', { style: 'percent', maximumFractionDigits: 1 });
+
+    const fmtMoney = n => (n >= 1000 ? fmtEUR0 : fmtEUR).format(n);
+    const fmtTime  = mins => {
+        if (!isFinite(mins) || mins <= 0) return '—';
+        if (mins < 1)  return `${Math.round(mins * 60)} s`;
+        if (mins < 60) return `${mins.toFixed(mins < 10 ? 1 : 0)} min`;
+        const h = Math.floor(mins / 60), m = Math.round(mins % 60);
+        return `${h} h ${String(m).padStart(2,'0')}`;
+    };
+
+    const frDateLong  = d => d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const frDateShort = d => d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+    const capFirst    = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+    /* ──────────────────── AUTO-SIZE INLINE INPUTS ──────────────────── */
+    function resizeInput(input) {
+        const len = Math.max((input.value || '').length, 1);
+        input.style.width = (len + 1.2) + 'ch';
+    }
+
+    /* ──────────────────── CORE COMPUTATION ──────────────────── */
+    function compute() {
+        const TJ    = Math.max(0, Number(inputs.tj.value) || 0);
+        const H     = Math.max(0.0001, Number(inputs.activeH.value) || 0.0001);
+        const poop  = Math.max(0, Number(inputs.poopMin.value) || 0);
+        const oneS  = Math.max(0, Number(inputs.oneWaySec.value) || 0);
+        const freq  = Math.max(0, Number(inputs.frequency.value) || 0);
+
+        const activeMin    = H * 60;
+        const perMin       = TJ / activeMin;
+        const totalMinutes = poop + (2 * oneS) / 60;
+        const cost         = totalMinutes * perMin;
+
+        const dailyCost   = cost * freq;
+        const monthlyCost = dailyCost * MONTHLY_DAYS;
+        const yearlyCost  = dailyCost * YEARLY_DAYS;
+        const dailyMin    = totalMinutes * freq;
+        const coffees     = dailyCost / COFFEE_PRICE;
+        const share       = activeMin > 0 ? dailyMin / activeMin : 0;
+
+        return { TJ, H, poop, oneS, freq, totalMinutes, cost, dailyCost, monthlyCost, yearlyCost, dailyMin, coffees, share };
+    }
+
+    /* ──────────────────── NUMBER ROLL ANIMATION ──────────────────── */
+    let _currentPrice = 0;
+    let _priceRAF = null;
+
+    function setPrice(to) {
+        if (_priceRAF) cancelAnimationFrame(_priceRAF);
+        const from = _currentPrice;
+        const t0 = performance.now();
+        const dur = Math.min(600, 200 + Math.abs(to - from) * 6);
+        const ease = t => 1 - Math.pow(1 - t, 3);
+        const step = now => {
+            const k = Math.min(1, (now - t0) / dur);
+            const v = from + (to - from) * ease(k);
+            ui.price.textContent = fmtMoney(v);
+            if (k < 1) _priceRAF = requestAnimationFrame(step);
+            else _currentPrice = to;
         };
-        const MODE_LABELS = { basic: 'Basic', advanced: 'Avancé', enterprise: 'Enterprise' };
+        _priceRAF = requestAnimationFrame(step);
+    }
 
-        // State
-        let currentMode = 'basic';
-        const DEFAULT_STATS = { calculations: 0, totalCost: 0, totalTime: 0 };
+    /* ──────────────────── TONE (classification) ──────────────────── */
+    function tone(cost) {
+        if (cost <= 0)  return { cls: '',           label: 'Pendant',     body: 'En attente de données suffisantes' };
+        if (cost < 1.5) return { cls: 'tone-low',    label: 'Anodin',      body: 'Coût marginal, conscience tranquille' };
+        if (cost < 3)   return { cls: 'tone-mid',    label: 'Modéré',      body: 'Dans les usages observés par l\u2019Institut' };
+        if (cost < 6)   return { cls: 'tone-high',   label: 'Préoccupant', body: 'Le comité déontologique est saisi' };
+        if (cost < 12)  return { cls: 'tone-high',   label: 'Sévère',      body: 'Entretien annuel compromis' };
+        return             { cls: 'tone-crisis', label: 'Crise nationale', body: 'Évacuez, déclarez, pleurez' };
+    }
 
-        const readStorage = (key, fallback) => {
-            try {
-                const raw = localStorage.getItem(key);
-                if (!raw) return JSON.parse(JSON.stringify(fallback));
-                const parsed = JSON.parse(raw);
-                if (Array.isArray(fallback)) return Array.isArray(parsed) ? parsed : [];
-                return typeof parsed === 'object' && parsed ? parsed : JSON.parse(JSON.stringify(fallback));
-            } catch {
-                return JSON.parse(JSON.stringify(fallback));
+    /* ──────────────────── RENDER ──────────────────── */
+    function render() {
+        const d = compute();
+
+        setPrice(d.cost);
+
+        const t = tone(d.cost);
+        ui.price.className = 'verdict-value ' + t.cls;
+
+        // Build kicker with DOM nodes (safe from XSS)
+        const strong = document.createElement('strong');
+        strong.textContent = t.label;
+        ui.kicker.replaceChildren(strong, document.createTextNode(' ' + t.body));
+
+        if (d.freq > 0) {
+            ui.idx.daily.textContent   = fmtMoney(d.dailyCost);
+            ui.idx.monthly.textContent = fmtMoney(d.monthlyCost);
+            ui.idx.yearly.textContent  = fmtMoney(d.yearlyCost);
+            ui.idx.time.textContent    = fmtTime(d.dailyMin);
+            ui.idx.coffees.textContent = d.coffees >= 10 ? `${Math.round(d.coffees)} ☕` : `${d.coffees.toFixed(1)} ☕`;
+            ui.idx.share.textContent   = fmtPct.format(d.share);
+        } else {
+            Object.values(ui.idx).forEach(el => el.textContent = '—');
+        }
+
+        updateTicker(d);
+        return d;
+    }
+
+    /* ──────────────────── TICKER ──────────────────── */
+    const TICKER_STATIC = [
+        { k: 'CAC-PQ 40',                v: '+0,34 %', dir: 'up' },
+        { k: 'Indice du vélin',          v: '−1,12 %', dir: 'down' },
+        { k: 'Papier-toilette, 12 rlx',  v: '+3,41 %', dir: 'up' },
+        { k: 'Baromètre des cabinets',   v: 'stable' },
+        { k: 'Taux directeur du trône',  v: '2,4 %',   dir: 'up' },
+        { k: 'Déficit gastro-national',  v: '—',       dir: 'down' }
+    ];
+
+    function updateTicker(d) {
+        const dynamic = [
+            { k: 'Préjudice courant',   v: fmtMoney(d.cost),                 dir: d.cost > 3 ? 'down' : 'up' },
+            { k: 'Extrapolation annuelle', v: fmtMoney(d.yearlyCost || 0),   dir: d.yearlyCost > 1000 ? 'down' : 'up' }
+        ];
+        const seq = dynamic.concat(TICKER_STATIC, dynamic, TICKER_STATIC); // doubled for seamless loop
+        const frag = document.createDocumentFragment();
+        seq.forEach(f => {
+            const span = document.createElement('span');
+            span.append(f.k + ' · ');
+            const b = document.createElement('b');
+            if (f.dir) b.className = f.dir;
+            b.textContent = f.v;
+            span.appendChild(b);
+            frag.appendChild(span);
+        });
+        ui.ticker.replaceChildren(frag);
+    }
+
+    /* ──────────────────── HISTORY / LEDGER ──────────────────── */
+    function saveCalc() {
+        const d = compute();
+        if (d.cost <= 0) { toast('Préjudice nul — rien à consigner'); return; }
+
+        const entry = {
+            ts:   new Date().toISOString(),
+            cost: d.cost,
+            time: d.totalMinutes,
+            inputs: {
+                tj:        inputs.tj.value,
+                activeH:   inputs.activeH.value,
+                poopMin:   inputs.poopMin.value,
+                oneWaySec: inputs.oneWaySec.value,
+                frequency: inputs.frequency.value
             }
         };
 
-        const storedStats = readStorage('poopStats', DEFAULT_STATS);
-        let stats = { ...DEFAULT_STATS, ...storedStats };
-        stats.calculations = Number(stats.calculations) || 0;
-        stats.totalCost = Number(stats.totalCost) || 0;
-        stats.totalTime = Number(stats.totalTime) || 0;
-        const storedHistory = readStorage('poopHistory', []);
-        let history = Array.isArray(storedHistory) ? storedHistory : [];
-        let theme = localStorage.getItem('poopTheme') || 'dark';
-        const storedAchievementsList = readStorage('poopAchievements', []);
-        const unlockedAchievements = new Set(Array.isArray(storedAchievementsList) ? storedAchievementsList : []);
+        history.unshift(entry);
+        if (history.length > 50) history = history.slice(0, 50);
+        localStorage.setItem(LS.history, JSON.stringify(history));
+        renderLedger();
+        toast(`Séance consignée · ${fmtMoney(d.cost)}`);
 
-        // Elements
-        const el = id => document.getElementById(id);
-        const body = document.body;
-        const tj = el('tj'), activeH = el('activeH'), poopMin = el('poopMin'), oneWaySec = el('oneWaySec'), frequency = el('frequency');
-        const price = el('price'), priceAnimation = el('priceAnimation'), efficiencyTag = el('efficiencyTag');
-        const resultCard = el('result');
-        const title = el('title'), themeToggle = el('themeToggle'), themeIcon = el('themeIcon'), themeText = el('themeText');
-        const inputGrid = el('inputGrid'), historyList = el('historyList'), modeExtras = el('modeExtras');
-        const totalCalculations = el('totalCalculations'), avgCost = el('avgCost'), totalTime = el('totalTime'), dailyLoss = el('dailyLoss');
-        const insightsEls = {
-            daily: el('insightDaily'),
-            monthly: el('insightMonthly'),
-            yearly: el('insightYearly'),
-            time: el('insightTime'),
-            coffees: el('insightCoffees')
-        };
-        const sparklinePath = document.getElementById('sparklinePath');
-        const timerDisplay = el('timerDisplay'), timerStatus = el('timerStatus'), timerAutoFill = el('timerAutoFill');
-        const timerStartBtn = el('timerStart'), timerPauseBtn = el('timerPause'), timerApplyBtn = el('timerApply');
-        const toastContainer = el('toastContainer');
-        const achievementNodes = Array.from(document.querySelectorAll('.achievement'));
-        const achievementMap = achievementNodes.reduce((acc, node) => {
-            acc[node.dataset.key] = node;
-            return acc;
-        }, {});
-        const timerState = { running: false, start: 0, elapsed: 0, interval: null };
-        const timerAutoFillBase = timerAutoFill ? timerAutoFill.textContent : '';
+        ui.title.animate(
+            [{ transform: 'scale(1)' }, { transform: 'scale(1.02)' }, { transform: 'scale(1)' }],
+            { duration: 500, easing: 'cubic-bezier(.2,.7,.2,1)' }
+        );
+    }
 
-        // Utilities
-        const fmtMoney = (n) => new Intl.NumberFormat('fr-FR', {style:'currency', currency:'EUR', minimumFractionDigits:2, maximumFractionDigits:2}).format(n);
-        const fmtTime = (min) => min > 60 ? `${Math.floor(min/60)}h ${Math.round(min%60)}min` : `${Math.round(min)}min`;
-        const randomEmoji = () => ['💸','💰','🤑','💵','💴','💶','💷'][Math.floor(Math.random()*7)];
-        const formatFrequency = (value) => {
-            const num = Number(value);
-            return Number.isFinite(num) && num > 0 ? `${num.toLocaleString('fr-FR', { maximumFractionDigits: 1 })}/j` : '';
-        };
-        const playSound = (freq, duration) => {
-            try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                osc.frequency.setValueAtTime(freq, ctx.currentTime);
-                osc.connect(ctx.destination);
-                osc.start(); osc.stop(ctx.currentTime + duration/1000);
-            } catch{}
-        };
-
-        // Theme management
-        function toggleTheme() {
-            theme = theme === 'dark' ? 'light' : 'dark';
-            body.dataset.theme = theme;
-            themeIcon.textContent = theme === 'dark' ? '🌙' : '☀️';
-            themeText.textContent = theme === 'dark' ? 'Mode sombre' : 'Mode clair';
-            localStorage.setItem('poopTheme', theme);
-        }
-
-        // Mode management
-        function switchMode(newMode) {
-            currentMode = newMode;
-            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`[data-mode="${newMode}"]`).classList.add('active');
-
-            // Update inputs based on mode
-            updateInputsForMode(newMode);
-            loadDefaults();
-        }
-
-        function updateInputsForMode(mode) {
-            modeExtras.innerHTML = '';
-            modeExtras.dataset.mode = mode;
-
-            if (mode === 'advanced' || mode === 'enterprise') {
-                const advancedMarkup = `
-                    <div class="extra-grid">
-                        <div>
-                            <label for="productivity">Productivité habituelle (%)</label>
-                            <div class="range-row">
-                                <input id="productivity" type="range" min="50" max="100" step="5" />
-                                <span class="range-value" id="productivityValue">85%</span>
-                            </div>
-                        </div>
-                        <div>
-                            <label for="urgency">Urgence du besoin</label>
-                            <select id="urgency">
-                                <option value="low">😌 Tranquille</option>
-                                <option value="normal" selected>😐 Normal</option>
-                                <option value="high">😰 Urgent</option>
-                                <option value="emergency">🚨 URGENCE!</option>
-                            </select>
-                        </div>
-                    </div>
-                `;
-
-                const enterpriseMarkup = `
-                    <div class="extra-grid extra-grid--split">
-                        <div>
-                            <label for="teamSize">Taille équipe</label>
-                            <div class="input-group">
-                                <input id="teamSize" type="number" min="1" step="1" />
-                                <span class="input-suffix">pers.</span>
-                            </div>
-                        </div>
-                        <div>
-                            <label for="meetingCost">Coût/h réunion</label>
-                            <div class="input-group">
-                                <input id="meetingCost" type="number" min="0" step="50" />
-                                <span class="input-suffix">€</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                modeExtras.innerHTML = advancedMarkup + (mode === 'enterprise' ? enterpriseMarkup : '');
+    function loadFromHistory(ts) {
+        const entry = history.find(h => h.ts === ts);
+        if (!entry) return;
+        Object.entries(entry.inputs).forEach(([k, v]) => {
+            if (inputs[k] && v !== undefined) {
+                inputs[k].value = v;
+                resizeInput(inputs[k]);
             }
+        });
+        render();
+        toast('Séance restaurée depuis le registre');
+    }
 
-            attachModeExtrasListeners();
+    function renderLedger() {
+        const tbody = ui.ledgerBody;
+        tbody.replaceChildren();
+
+        if (history.length === 0) {
+            const tr = document.createElement('tr');
+            const td = document.createElement('td');
+            td.className = 'empty';
+            td.colSpan = 4;
+            td.textContent = '— Registre vierge. Aucune séance consignée —';
+            tr.appendChild(td);
+            tbody.appendChild(tr);
+            return;
         }
 
-        function updateProductivityDisplay() {
-            const slider = el('productivity');
-            const label = el('productivityValue');
-            if (slider && label) label.textContent = `${slider.value}%`;
-        }
-
-        function attachModeExtrasListeners() {
-            const productivitySlider = el('productivity');
-
-            if (productivitySlider) {
-                updateProductivityDisplay();
-                productivitySlider.addEventListener('input', () => {
-                    updateProductivityDisplay();
-                    compute();
-                });
-            }
-
-            ['urgency', 'teamSize', 'meetingCost'].forEach(id => {
-                const control = el(id);
-                if (control) control.addEventListener('input', compute);
+        history.slice(0, 10).forEach((h, i) => {
+            const d = new Date(h.ts);
+            const n = String(history.length - i).padStart(3, '0');
+            const tr = document.createElement('tr');
+            tr.dataset.ts = h.ts;
+            const cells = [
+                `№ ${n}`,
+                `${frDateShort(d)} · ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}`,
+                fmtTime(h.time),
+                fmtMoney(Number(h.cost) || 0)
+            ];
+            cells.forEach(txt => {
+                const td = document.createElement('td');
+                td.textContent = txt;
+                tr.appendChild(td);
             });
-        }
+            tr.addEventListener('click', () => loadFromHistory(h.ts));
+            tbody.appendChild(tr);
+        });
+    }
 
-        // Enhanced computation
-        function compute() {
-            const TJ = Math.max(0, Number(tj.value || 0));
-            const H = Math.max(0.0001, Number(activeH.value || 0));
-            const poopM = Math.max(0, Number(poopMin.value || 0));
-            const oneS = Math.max(0, Number(oneWaySec.value || 0));
-            const freq = Math.max(0, Number(frequency?.value || 0));
+    function exportCSV() {
+        if (history.length === 0) { toast('Rien à imprimer — registre vierge'); return; }
+        const rows = [
+            ['Date','Préjudice (€)','Durée (min)','TJ','Heures','Poop (min)','Trajet (s)','Fréquence (/j)']
+        ];
+        history.forEach(h => {
+            rows.push([
+                new Date(h.ts).toISOString(),
+                Number(h.cost).toFixed(2),
+                Number(h.time).toFixed(1),
+                h.inputs.tj, h.inputs.activeH, h.inputs.poopMin, h.inputs.oneWaySec, h.inputs.frequency
+            ]);
+        });
+        const csv = rows.map(r => r.join(',')).join('\n');
+        const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = Object.assign(document.createElement('a'), {
+            href: url,
+            download: `gazette-du-trone-${new Date().toISOString().slice(0,10)}.csv`
+        });
+        a.click();
+        URL.revokeObjectURL(url);
+        toast('Édition imprimée — téléchargement en cours');
+    }
 
-            const activeMin = H * 60;
-            const perMin = TJ / activeMin;
-            const totalMinutes = poopM + (2 * oneS) / 60;
-            let cost = totalMinutes * perMin;
+    function clearHistory() {
+        if (history.length === 0) return;
+        if (!confirm('Purger définitivement le registre des séances ?')) return;
+        history = [];
+        localStorage.removeItem(LS.history);
+        renderLedger();
+        toast('Registre purgé');
+    }
 
-            // Apply mode-specific calculations
-            if (currentMode === 'advanced' || currentMode === 'enterprise') {
-                const productivity = Number(el('productivity')?.value || 85) / 100;
-                const urgency = el('urgency')?.value || 'normal';
+    /* ──────────────────── TOAST ──────────────────── */
+    function toast(msg) {
+        const el = document.createElement('div');
+        el.className = 'toast';
+        el.textContent = msg;
+        ui.toasts.appendChild(el);
+        setTimeout(() => el.remove(), 3600);
+    }
 
-                // Urgency multipliers
-                const urgencyMultipliers = { low: 0.8, normal: 1, high: 1.3, emergency: 2 };
-                cost *= urgencyMultipliers[urgency] || 1;
+    /* ──────────────────── CHRONOGRAPH ──────────────────── */
+    const chrono = { running: false, start: 0, elapsed: 0, raf: null };
 
-                // Productivity adjustment
-                cost *= (2 - productivity); // Lower productivity = higher relative cost
+    const chronoElapsed = () =>
+        chrono.running ? chrono.elapsed + (Date.now() - chrono.start) : chrono.elapsed;
 
-                if (currentMode === 'enterprise') {
-                    const teamSize = Number(el('teamSize')?.value || 1);
-                    const meetingCost = Number(el('meetingCost')?.value || 0);
+    function chronoFormat(ms) {
+        const total = Math.floor(ms / 1000);
+        const h = Math.floor(total / 3600);
+        const m = Math.floor((total % 3600) / 60);
+        const s = total % 60;
+        const cs = Math.floor((ms % 1000) / 10);
+        if (h > 0) return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}:${String(cs).padStart(2,'0')}`;
+    }
 
-                    // Team impact (if blocking others)
-                    if (teamSize > 1) cost *= 1 + (teamSize - 1) * 0.1;
+    function updateChronoUI(statusTxt) {
+        const ms = chronoElapsed();
+        ui.chrono.display.textContent = chronoFormat(ms);
 
-                    // Meeting opportunity cost
-                    if (meetingCost > 0) cost += (meetingCost / 60) * totalMinutes;
-                }
-            }
+        const sec = (ms / 1000) % 60;
+        ui.chrono.hand.style.transform = `translate(-50%, -100%) rotate(${sec * 6}deg)`;
 
-            // Update display
-            const oldPrice = price.textContent;
-            price.textContent = fmtMoney(cost);
+        if (statusTxt !== undefined) ui.chrono.status.textContent = statusTxt;
+        ui.chrono.status.classList.toggle('is-running', chrono.running);
 
-            // Efficiency rating
-            const efficiency = cost < 2 ? '🟢 Efficace' : cost < 5 ? '🟡 Moyen' : '🔴 Coûteux';
-            efficiencyTag.textContent = efficiency;
-            if (resultCard) {
-                const tone = cost < 2 ? 'success' : cost < 5 ? 'warning' : 'danger';
-                resultCard.dataset.tone = tone;
-            }
+        ui.chrono.start.disabled = chrono.running;
+        ui.chrono.start.textContent = (!chrono.running && chrono.elapsed > 0) ? 'Reprendre' : 'Lancer';
+        ui.chrono.pause.disabled = !chrono.running;
+        ui.chrono.apply.disabled = ms < 3000;
+    }
 
-            // Animation on change
-            if (oldPrice !== '—' && oldPrice !== price.textContent) {
-                priceAnimation.textContent = randomEmoji();
-                priceAnimation.classList.add('animate');
-                setTimeout(() => priceAnimation.classList.remove('animate'), 600);
+    function chronoStart() {
+        if (chrono.running) return;
+        chrono.running = true;
+        chrono.start = Date.now();
+        const tick = () => {
+            if (!chrono.running) return;
+            updateChronoUI('En cours…');
+            chrono.raf = requestAnimationFrame(tick);
+        };
+        chrono.raf = requestAnimationFrame(tick);
+        updateChronoUI('En cours…');
+    }
 
-                if (cost > 10) playSound(200, 100);
-            }
+    function chronoPause() {
+        if (!chrono.running) return;
+        chrono.elapsed += Date.now() - chrono.start;
+        chrono.running = false;
+        if (chrono.raf) cancelAnimationFrame(chrono.raf);
+        updateChronoUI('Interrompu');
+    }
 
-            const dailyCost = cost * freq;
-            const monthlyCost = dailyCost * 22;
-            const yearlyCost = dailyCost * 220;
-            const dailyMinutes = totalMinutes * freq;
+    function chronoApply() {
+        const ms = chronoElapsed();
+        if (ms < 3000) return;
+        chronoPause();
+        const minutes = Math.max(0.5, Number((ms / 60000).toFixed(2)));
+        inputs.poopMin.value = minutes;
+        resizeInput(inputs.poopMin);
+        render();
+        saveCalc();
+        chrono.elapsed = 0;
+        updateChronoUI('En attente de commandement');
+    }
 
-            const result = { cost, totalMinutes, efficiency, freq, dailyCost, monthlyCost, yearlyCost, dailyMinutes };
-            updateInsights(result);
+    /* ──────────────────── EDITION (theme) ──────────────────── */
+    function applyEdition() {
+        document.body.dataset.edition = edition;
+        const isMorning = edition === 'morning';
+        ui.editionTag.textContent = isMorning ? 'Édition du matin' : 'Édition du soir';
+        ui.editionBtn.textContent = isMorning ? 'Passer à l\u2019édition du soir' : 'Revenir à l\u2019édition du matin';
+    }
+    function toggleEdition() {
+        edition = edition === 'morning' ? 'evening' : 'morning';
+        localStorage.setItem(LS.edition, edition);
+        applyEdition();
+    }
 
-            return result;
-        }
+    /* ──────────────────── DEFAULTS ──────────────────── */
+    function loadDefaults() {
+        Object.entries(DEFAULTS).forEach(([k, v]) => {
+            inputs[k].value = v;
+            resizeInput(inputs[k]);
+        });
+    }
 
-        // History management
-        function saveCalculation() {
-            const calc = compute();
-            const timestamp = new Date().toISOString();
-            const inputs = {
-                tj: tj.value,
-                activeH: activeH.value,
-                poopMin: poopMin.value,
-                oneWaySec: oneWaySec.value,
-                frequency: frequency.value
-            };
-
-            ['productivity', 'urgency', 'teamSize', 'meetingCost'].forEach(id => {
-                const node = el(id);
-                if (node) inputs[id] = node.value;
-            });
-
-            const entry = {
-                timestamp,
-                cost: calc.cost,
-                time: calc.totalMinutes,
-                mode: currentMode,
-                inputs
-            };
-
-            history.unshift(entry);
-            if (history.length > 50) history = history.slice(0, 50); // Keep last 50
-
-            stats.calculations++;
-            stats.totalCost += calc.cost;
-            stats.totalTime += calc.totalMinutes;
-
-            localStorage.setItem('poopHistory', JSON.stringify(history));
-            localStorage.setItem('poopStats', JSON.stringify(stats));
-
-            updateStats();
-            updateHistory();
-            evaluateAchievements();
-
-            // Success animation
-            title.classList.add('pulse');
-            setTimeout(() => title.classList.remove('pulse'), 2000);
-        }
-
-        function updateStats() {
-            totalCalculations.textContent = stats.calculations;
-            avgCost.textContent = stats.calculations > 0 ? fmtMoney(stats.totalCost / stats.calculations) : fmtMoney(0);
-            totalTime.textContent = fmtTime(stats.totalTime);
-
-            // Daily loss estimation (assuming 3 times per day)
-            const dailyCost = stats.calculations > 0 ? (stats.totalCost / stats.calculations) * 3 : 0;
-            dailyLoss.textContent = fmtMoney(dailyCost);
-        }
-
-        function updateInsights(calc) {
-            if (!insightsEls.daily) return;
-
-            if (calc.freq > 0) {
-                insightsEls.daily.textContent = fmtMoney(calc.dailyCost);
-                insightsEls.monthly.textContent = fmtMoney(calc.monthlyCost);
-                insightsEls.yearly.textContent = fmtMoney(calc.yearlyCost);
-                insightsEls.time.textContent = fmtTime(calc.dailyMinutes);
-
-                const coffeePrice = 2.5;
-                const coffees = calc.dailyCost / coffeePrice;
-                const coffeeText = coffees >= 10 ? `${Math.round(coffees)} ☕` : `${coffees.toFixed(1)} ☕`;
-                insightsEls.coffees.textContent = coffeeText;
-            } else {
-                insightsEls.daily.textContent = '—';
-                insightsEls.monthly.textContent = '—';
-                insightsEls.yearly.textContent = '—';
-                insightsEls.time.textContent = '—';
-                insightsEls.coffees.textContent = '—';
-            }
-        }
-
-        function updateHistory() {
-            if (history.length === 0) {
-                historyList.innerHTML = '<div style="text-align:center; color:var(--muted); font-style:italic">Aucun calcul encore</div>';
-                updateSparkline();
-                return;
-            }
-
-            historyList.innerHTML = history.slice(0, 10).map(entry => {
-                const freqLabel = formatFrequency(entry.inputs?.frequency);
-                const costValue = Number(entry.cost) || 0;
-                return `
-                <div class="history-item" onclick="loadFromHistory('${entry.timestamp}')">
-                    <div class="history-price">${fmtMoney(costValue)}</div>
-                    <div class="history-details">
-                        ${new Date(entry.timestamp).toLocaleDateString('fr')} • ${fmtTime(entry.time)} • ${MODE_LABELS[entry.mode] || entry.mode}${freqLabel ? ` • ${freqLabel}` : ''}
-                    </div>
-                </div>
+    /* ──────────────────── EASTER EGG ──────────────────── */
+    function rainFleurons() {
+        const glyphs = ['❦','⚜','✦','§','¶','†','✝'];
+        for (let i = 0; i < 24; i++) {
+            const span = document.createElement('span');
+            span.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
+            const opacity = 0.5 + Math.random() * 0.5;
+            span.style.cssText = `
+                position:fixed; z-index:40; pointer-events:none;
+                left:${Math.random()*100}vw; top:-40px;
+                color:var(--gold); font-size:${16 + Math.random()*18}px;
+                opacity:${opacity};
+                transform:rotate(${Math.random()*360}deg);
             `;
-            }).join('');
-
-            updateSparkline();
+            document.body.appendChild(span);
+            const dur = 2200 + Math.random() * 1400;
+            span.animate(
+                [
+                    { transform: `translate(0,0) rotate(0deg)`,                                                                                                         opacity },
+                    { transform: `translate(${(Math.random()-.5)*80}px, ${window.innerHeight + 80}px) rotate(${Math.random()*720}deg)`, opacity: 0 }
+                ],
+                { duration: dur, easing: 'cubic-bezier(.3,.1,.3,1)' }
+            ).onfinish = () => span.remove();
         }
+        toast('§ Rédacteur en chef détecté §');
+    }
 
-        function updateSparkline() {
-            if (!sparklinePath) return;
+    /* ──────────────────── INIT ──────────────────── */
+    function init() {
+        ui.date.textContent = capFirst(frDateLong(new Date()));
+        applyEdition();
+        loadDefaults();
 
-            const recent = history.slice(0, 12).map(entry => Number(entry.cost) || 0).reverse();
-            if (recent.length === 0) {
-                sparklinePath.setAttribute('d', '');
-                sparklinePath.setAttribute('opacity', '0');
-                return;
-            }
-
-            const height = 40;
-            const width = 100;
-
-            if (recent.length === 1) {
-                const midY = height / 2;
-                sparklinePath.setAttribute('d', `M0,${midY} L${width},${midY}`);
-                sparklinePath.setAttribute('opacity', '0.35');
-                return;
-            }
-
-            const max = Math.max(...recent);
-            const min = Math.min(...recent);
-            const range = max - min || Math.max(max, 1);
-            const step = width / (recent.length - 1);
-
-            const path = recent.map((cost, index) => {
-                const normalized = range === 0 ? 0.5 : (cost - min) / range;
-                const y = height - (normalized * (height - 6)) - 3;
-                const x = index * step;
-                return `${index === 0 ? 'M' : 'L'}${x.toFixed(2)},${y.toFixed(2)}`;
-            }).join(' ');
-
-            sparklinePath.setAttribute('d', path);
-            sparklinePath.setAttribute('opacity', '1');
-        }
-
-        function showToast(message) {
-            if (!toastContainer) return;
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = message;
-            toastContainer.appendChild(toast);
-
-            while (toastContainer.childElementCount > 4) {
-                toastContainer.firstElementChild?.remove();
-            }
-
-            setTimeout(() => toast.classList.add('hide'), 3500);
-            setTimeout(() => toast.remove(), 4100);
-        }
-
-        function setAchievementState(key, unlocked) {
-            const node = achievementMap[key];
-            if (!node) return;
-            node.classList.toggle('locked', !unlocked);
-            const statusEl = node.querySelector('.achievement-status');
-            if (statusEl) statusEl.textContent = unlocked ? '✅' : '🔒';
-        }
-
-        function highlightAchievement(key) {
-            const node = achievementMap[key];
-            if (!node) return;
-            node.classList.add('pulse');
-            setTimeout(() => node.classList.remove('pulse'), 1600);
-            const label = node.querySelector('span')?.textContent?.trim() || key;
-            showToast(`Succès débloqué : ${label}`);
-        }
-
-        function evaluateAchievements({ silent = false } = {}) {
-            const highestCost = history.reduce((max, entry) => Math.max(max, Number(entry.cost) || 0), 0);
-            const conditions = {
-                first: stats.calculations > 0,
-                saver: history.length >= 5 || stats.totalTime >= 120,
-                highroller: highestCost >= 50
-            };
-
-            let updated = false;
-            Object.entries(conditions).forEach(([key, unlocked]) => {
-                if (unlocked && !unlockedAchievements.has(key)) {
-                    unlockedAchievements.add(key);
-                    updated = true;
-                    if (!silent) highlightAchievement(key);
-                }
-                setAchievementState(key, unlockedAchievements.has(key));
+        Object.values(inputs).forEach(input => {
+            resizeInput(input);
+            input.addEventListener('input', () => {
+                resizeInput(input);
+                render();
             });
-
-            if (updated) {
-                localStorage.setItem('poopAchievements', JSON.stringify(Array.from(unlockedAchievements)));
-            }
-        }
-
-        function getTimerElapsed() {
-            return timerState.running ? timerState.elapsed + (Date.now() - timerState.start) : timerState.elapsed;
-        }
-
-        function formatTimer(ms) {
-            const totalSeconds = Math.floor(ms / 1000);
-            const minutes = Math.floor(totalSeconds / 60);
-            const seconds = totalSeconds % 60;
-            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        }
-
-        function updateTimerUI(statusText) {
-            if (!timerDisplay) return;
-            const elapsed = getTimerElapsed();
-            timerDisplay.textContent = formatTimer(elapsed);
-            if (statusText && timerStatus) timerStatus.textContent = statusText;
-            timerStatus?.classList.toggle('timer-running', timerState.running);
-
-            if (timerStartBtn) {
-                timerStartBtn.disabled = timerState.running;
-                timerStartBtn.textContent = !timerState.running && timerState.elapsed > 0 ? '🔁 Reprendre' : '▶️ Lancer';
-            }
-            if (timerPauseBtn) timerPauseBtn.disabled = !timerState.running;
-            if (timerApplyBtn) timerApplyBtn.disabled = elapsed < 5000;
-        }
-
-        function startTimer() {
-            if (!timerDisplay || timerState.running) return;
-            timerState.running = true;
-            timerState.start = Date.now();
-            timerState.interval = setInterval(() => updateTimerUI(), 250);
-            updateTimerUI('En cours…');
-        }
-
-        function pauseTimer(manual = true) {
-            if (!timerState.running) return;
-            timerState.elapsed += Date.now() - timerState.start;
-            timerState.running = false;
-            if (timerState.interval) {
-                clearInterval(timerState.interval);
-                timerState.interval = null;
-            }
-            updateTimerUI(manual ? 'En pause' : undefined);
-        }
-
-        function resetTimer(status = 'En attente') {
-            if (timerState.interval) {
-                clearInterval(timerState.interval);
-                timerState.interval = null;
-            }
-            timerState.running = false;
-            timerState.start = 0;
-            timerState.elapsed = 0;
-            updateTimerUI(status);
-            if (timerAutoFill) timerAutoFill.textContent = timerAutoFillBase;
-        }
-
-        function applyTimer() {
-            const elapsed = getTimerElapsed();
-            if (elapsed < 5000) {
-                updateTimerUI('Session trop courte');
-                setTimeout(() => updateTimerUI('En attente'), 1200);
-                return;
-            }
-
-            pauseTimer(false);
-            const minutes = elapsed / 60000;
-            const rounded = Math.max(0.5, Number(minutes.toFixed(1)));
-            poopMin.value = rounded;
-            if (timerAutoFill) timerAutoFill.textContent = `Dernière durée enregistrée : ${rounded} min`;
-            compute();
-            saveCalculation();
-            showToast(`Durée appliquée (${rounded} min)`);
-            resetTimer('En attente');
-        }
-
-        function loadFromHistory(timestamp) {
-            const entry = history.find(h => h.timestamp === timestamp);
-            if (!entry) return;
-
-            if (entry.mode !== currentMode) switchMode(entry.mode);
-
-            tj.value = entry.inputs.tj;
-            activeH.value = entry.inputs.activeH;
-            poopMin.value = entry.inputs.poopMin;
-            oneWaySec.value = entry.inputs.oneWaySec;
-            if (entry.inputs.frequency !== undefined) frequency.value = entry.inputs.frequency;
-
-            ['productivity', 'urgency', 'teamSize', 'meetingCost'].forEach(id => {
-                if (entry.inputs[id] !== undefined && el(id)) {
-                    el(id).value = entry.inputs[id];
-                }
+            input.addEventListener('keydown', e => {
+                if (e.key === 'Enter') { e.preventDefault(); saveCalc(); }
             });
-            updateProductivityDisplay();
+        });
 
-            compute();
-        }
+        ui.editionBtn.addEventListener('click', toggleEdition);
+        ui.saveBtn.addEventListener('click', saveCalc);
+        ui.exportBtn.addEventListener('click', exportCSV);
+        ui.clearBtn.addEventListener('click', clearHistory);
+        ui.chrono.start.addEventListener('click', chronoStart);
+        ui.chrono.pause.addEventListener('click', chronoPause);
+        ui.chrono.apply.addEventListener('click', chronoApply);
 
-        // Export functionality
-        function exportToCSV() {
-            const csv = [
-                'Date,Coût,Temps (min),Mode,TJ,Heures,Durée poop,Trajet,Fréquence,Productivité,Urgence,Équipe,Coût réunion',
-                ...history.map(h => {
-                    const inputs = h.inputs || {};
-                    return [
-                        new Date(h.timestamp).toLocaleDateString('fr'),
-                        Number(h.cost || 0).toFixed(2),
-                        Number(h.time || 0).toFixed(1),
-                        h.mode,
-                        inputs.tj ?? '',
-                        inputs.activeH ?? '',
-                        inputs.poopMin ?? '',
-                        inputs.oneWaySec ?? '',
-                        inputs.frequency ?? '',
-                        inputs.productivity ?? '',
-                        inputs.urgency ?? '',
-                        inputs.teamSize ?? '',
-                        inputs.meetingCost ?? ''
-                    ].join(',');
-                })
-            ].join('\n');
+        ui.chrono.display.addEventListener('dblclick', () => {
+            if (chrono.running) chronoPause();
+            chrono.elapsed = 0;
+            updateChronoUI('En attente de commandement');
+            toast('Chronomètre remis à zéro');
+        });
 
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `poop-calculator-${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        // Share functionality
-        async function shareResults() {
-            const calc = compute();
-            const freqInfo = calc.freq > 0 ? ` (${calc.freq.toLocaleString('fr-FR')}x/jour)` : '';
-            const text = `J'ai calculé que mon 💩 me coûte ${fmtMoney(calc.cost)}${freqInfo} ! Calculez le vôtre sur Poop Price Calculator 💩`;
-
-            if (navigator.share) {
-                try {
-                    await navigator.share({ text, url: window.location.href });
-                } catch (e) { fallbackShare(text); }
-            } else { fallbackShare(text); }
-        }
-
-        function fallbackShare(text) {
-            navigator.clipboard?.writeText(text);
-            const shareBtn = el('shareBtn');
-            if (!shareBtn) return;
-            const originalText = shareBtn.textContent;
-            shareBtn.textContent = '✅ Copié!';
-            showToast('Texte copié dans le presse-papiers');
-            setTimeout(() => shareBtn.textContent = originalText, 2000);
-        }
-
-        // Easter eggs
-        function addEasterEgg() {
-            const egg = document.createElement('div');
-            egg.className = 'easter-egg';
-            egg.textContent = '💩';
-            egg.style.left = Math.random() * window.innerWidth + 'px';
-            egg.style.top = Math.random() * window.innerHeight + 'px';
-            document.body.appendChild(egg);
-
-            setTimeout(() => egg.remove(), 3000);
-        }
-
-        let clickCount = 0;
-        title.addEventListener('click', () => {
-            clickCount++;
-            if (clickCount >= 5) {
-                addEasterEgg();
-                playSound(440, 200);
-                clickCount = 0;
+        // Easter egg: 5 clicks on the title → fleurons rain
+        let clicks = 0, clickTimer = null;
+        ui.title.addEventListener('click', () => {
+            clicks++;
+            clearTimeout(clickTimer);
+            clickTimer = setTimeout(() => clicks = 0, 1800);
+            if (clicks >= 5) {
+                clicks = 0;
+                rainFleurons();
             }
         });
 
-        // Reset function
-        function resetAll() {
-            if (confirm('Réinitialiser tous les paramètres et données ?')) {
-                ['poopStats', 'poopHistory', 'poopAchievements'].forEach(key => localStorage.removeItem(key));
-                stats = JSON.parse(JSON.stringify(DEFAULT_STATS));
-                history = [];
-                unlockedAchievements.clear();
-                achievementNodes.forEach(node => setAchievementState(node.dataset.key, false));
-                loadDefaults();
-                updateStats();
-                updateHistory();
-                resetTimer('En attente');
-                title.classList.add('shake');
-                setTimeout(() => title.classList.remove('shake'), 500);
-            }
-        }
+        renderLedger();
+        render();
+        updateChronoUI('En attente de commandement');
+    }
 
-        // Load defaults
-        function loadDefaults() {
-            const defaults = DEFAULTS[currentMode] || DEFAULTS.basic;
-            tj.value = defaults.tj;
-            activeH.value = defaults.activeH;
-            poopMin.value = defaults.poopMin;
-            oneWaySec.value = defaults.oneWaySec;
-            frequency.value = defaults.frequency ?? 2;
-
-            // Set advanced inputs if they exist
-            const productivityInput = el('productivity');
-            if (productivityInput) {
-                productivityInput.value = defaults.productivity ?? 85;
-                updateProductivityDisplay();
-            }
-
-            const urgencySelect = el('urgency');
-            if (urgencySelect) urgencySelect.value = defaults.urgency ?? 'normal';
-
-            const teamInput = el('teamSize');
-            if (teamInput) teamInput.value = defaults.teamSize ?? 1;
-
-            const meetingInput = el('meetingCost');
-            if (meetingInput) meetingInput.value = defaults.meetingCost ?? 0;
-
-            compute();
-        }
-
-        // Event listeners
-        themeToggle.addEventListener('click', toggleTheme);
-        document.querySelectorAll('.mode-btn').forEach(btn => {
-            btn.addEventListener('click', () => switchMode(btn.dataset.mode));
-        });
-
-        [tj, activeH, poopMin, oneWaySec, frequency].forEach(input => input?.addEventListener('input', compute));
-
-        el('saveBtn').addEventListener('click', saveCalculation);
-        el('shareBtn').addEventListener('click', shareResults);
-        el('resetBtn').addEventListener('click', resetAll);
-        el('exportBtn').addEventListener('click', exportToCSV);
-        el('clearHistoryBtn').addEventListener('click', () => {
-            if (confirm('Vider l\'historique ?')) {
-                history = [];
-                localStorage.removeItem('poopHistory');
-                updateHistory();
-            }
-        });
-        timerStartBtn?.addEventListener('click', startTimer);
-        timerPauseBtn?.addEventListener('click', pauseTimer);
-        timerApplyBtn?.addEventListener('click', applyTimer);
-        timerDisplay?.addEventListener('dblclick', () => {
-            resetTimer('En attente');
-            showToast('Minuteur remis à zéro');
-        });
-
-        // Initialize
-        function init() {
-            body.dataset.theme = theme;
-            themeIcon.textContent = theme === 'dark' ? '🌙' : '☀️';
-            themeText.textContent = theme === 'dark' ? 'Mode sombre' : 'Mode clair';
-
-            loadDefaults();
-            updateStats();
-            updateHistory();
-            evaluateAchievements({ silent: true });
-            updateTimerUI('En attente');
-
-            // Auto-save every calculation
-            [tj, activeH, poopMin, oneWaySec, frequency].forEach(input => {
-                input.addEventListener('change', () => {
-                    if (input.value && compute().cost > 0) saveCalculation();
-                });
-            });
-        }
-
-        init();
-
-        // Make functions available globally for onclick handlers
-        window.loadFromHistory = loadFromHistory;
-    })();
+    document.addEventListener('DOMContentLoaded', init);
+    if (document.readyState !== 'loading') init();
+})();
 </script>
 </body>
 </html>
-
-
-
